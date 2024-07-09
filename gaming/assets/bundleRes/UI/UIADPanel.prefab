@@ -377,7 +377,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 900,
+      "width": 800,
       "height": 600
     },
     "_anchorPoint": {
@@ -429,8 +429,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "You don't have enough coins. Please pay $1 to exchange for 500 coins.",
-    "_N$string": "You don't have enough coins. Please pay $1 to exchange for 500 coins.",
+    "_string": "You don't have enough coins. Please pay 0.001 $MOV to exchange for 500 coins.",
+    "_N$string": "You don't have enough coins. Please pay 0.001 $MOV to exchange for 500 coins.",
     "_fontSize": 70,
     "_lineHeight": 90,
     "_enableWrapText": true,

@@ -690,7 +690,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 338,
+      "width": 500,
       "height": 327
     },
     "_anchorPoint": {
@@ -757,7 +757,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 136.53,
+      "width": 316.61,
       "height": 62.4
     },
     "_anchorPoint": {
@@ -809,8 +809,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Pay $4",
-    "_N$string": "Pay $4",
+    "_string": "Pay 0.004 $MOV",
+    "_N$string": "Pay 0.004 $MOV",
     "_fontSize": 40,
     "_lineHeight": 40,
     "_enableWrapText": true,
@@ -874,8 +874,8 @@
     "_spriteFrame": {
       "__uuid__": "685b3448-9510-4d6f-9093-1195b8f6c77c"
     },
-    "_type": 0,
-    "_sizeMode": 1,
+    "_type": 1,
+    "_sizeMode": 0,
     "_fillType": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
