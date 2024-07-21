@@ -273,16 +273,11 @@ export function App() {
   ) => {
     let account = wallet?.getAccount();
     if (account) {
-      const gasTokenAmount = await readContract({
-        contract: GameContract,
-        method: "function getGasTokenAmountByUsd(uint256 usd) view returns (uint256)", 
-        params: [BigInt(4)],  // pay $4 
-      });
       const transaction = await prepareContractCall({
         contract: GameContract,
         method: "function requestLottery() payable", 
         params: [] ,
-        value: gasTokenAmount, // gas token amount for payable function
+        value: BigInt(4*(10**15)), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
@@ -308,16 +303,11 @@ export function App() {
   ) => {
     let account = wallet?.getAccount();
     if (account) {
-      const gasTokenAmount = await readContract({
-        contract: GameContract,
-        method: "function getGasTokenAmountByUsd(uint256 usd) view returns (uint256)", 
-        params: [BigInt(1)],  // pay $1 
-      });
       const transaction = await prepareContractCall({
         contract: GameContract,
         method: "function mintGold() payable", 
         params: [],
-        value: gasTokenAmount, // gas token amount for payable function
+        value: BigInt(10**15), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
@@ -343,16 +333,11 @@ export function App() {
   ) => {
     let account = wallet?.getAccount();
     if (account) {
-      const gasTokenAmount = await readContract({
-        contract: GameContract,
-        method: "function getGasTokenAmountByUsd(uint256 usd) view returns (uint256)", 
-        params: [BigInt(5)],  // pay $5 
-      });
       const transaction = await prepareContractCall({
         contract: GameContract,
         method: "function reLive() payable", 
         params: [],
-        value: gasTokenAmount, // gas token amount for payable function
+        value: BigInt(5*(10**15)), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
