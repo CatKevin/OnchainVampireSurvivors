@@ -3,13 +3,6 @@ pragma solidity 0.8.19;
 
 import "@thirdweb-dev/contracts/extension/Ownable.sol";
 
-interface AggregatorV3Interface {
-  function latestRoundData()
-    external
-    view
-    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
-}
-
 interface IUltraVerifier {
     function getVerificationKeyHash() external pure returns (bytes32);
 
@@ -20,6 +13,12 @@ interface IUltraVerifier {
 }
 
 contract ZKGameClient is Ownable {
+    // 0: Gold; 1: Diamond;
+    struct PriceItem {
+        uint priceType;
+        uint price;
+    }
+
     struct MessageItem {
         address player;
         uint time;
@@ -53,9 +52,7 @@ contract ZKGameClient is Ownable {
         uint grade,
         uint reLive
     );
-
-    address public gasTokenAggregator = 0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1; // Base Sepolia testnet ETH/USD;
-
+    
     // Lottery
     uint256 public totalLotteryTimes = 0;
     LotteryItem[] public LotteryItemList;
@@ -80,9 +77,52 @@ contract ZKGameClient is Ownable {
     mapping(uint => GameLog) public gameLogMap; // id => GameLog
     uint public totalGame = 0;
 
+    // weapon upgrade
+    mapping(uint => PriceItem) public weaponPriceMap; // id => price
+    uint[] public weaponLevelPriceList;
+    // skin upgrade
+    mapping(uint => PriceItem) public skinPriceMap; // id => price
+    uint[] public skinLevelPriceList;
+
     constructor(){
         _setupOwner(msg.sender);
+        initWeaponAndSkinData();
         initLotteryList();
+    }
+
+    function initWeaponAndSkinData() public onlyOwner {
+        // weapon price
+        weaponPriceMap[0] = PriceItem(0, 0);
+        weaponPriceMap[1] = PriceItem(0, 1000);
+        weaponPriceMap[5] = PriceItem(0, 1500);
+        weaponPriceMap[6] = PriceItem(0, 2000);
+        weaponPriceMap[7] = PriceItem(0, 500);
+        weaponPriceMap[8] = PriceItem(0, 5000);
+        weaponPriceMap[9] = PriceItem(1, 500);
+        weaponPriceMap[15] = PriceItem(1, 500);
+        weaponPriceMap[16] = PriceItem(0, 3000);
+        weaponPriceMap[18] = PriceItem(1, 1000);
+
+        // skin price
+        skinPriceMap[0] = PriceItem(0, 0);
+        skinPriceMap[1] = PriceItem(0, 1000);
+        skinPriceMap[2] = PriceItem(0, 2500);
+        skinPriceMap[3] = PriceItem(1, 1000);
+
+        // weapon leavel price (glod)
+        weaponLevelPriceList.push(0); // new weapon
+        weaponLevelPriceList.push(100);
+        weaponLevelPriceList.push(300);
+        weaponLevelPriceList.push(600);
+                
+        // skin leavel price (glod)
+        skinLevelPriceList.push(0); // new skin
+        skinLevelPriceList.push(100);
+        skinLevelPriceList.push(200);
+        skinLevelPriceList.push(300);
+        skinLevelPriceList.push(400);
+        skinLevelPriceList.push(500);
+        skinLevelPriceList.push(600);
     }
 
     // lottery
@@ -101,21 +141,11 @@ contract ZKGameClient is Ownable {
         LotteryItemList.push(LotteryItem(3,9));
     }
 
-    // eg. 3000usdt = 1 eth = 10**18
-    // current eth price: $3000, if usd = 3000, then you will get 10**18
-    function getGasTokenAmountByUsd(uint usd) public view returns(uint) {
-        (, int256 price, , , ) = AggregatorV3Interface(gasTokenAggregator).latestRoundData();
-        return usd * uint((10**18/price) * 10**8); // will not overflow, when eth price is under $10**10
-    }
-
     function distribution(address payable winner, uint amount) internal {
         winner.transfer(amount);
     }
 
     function startGame() public {
-    // function startGame() public payable {
-        // TODO: pay money
-
         playerLatestGameLogIdMap[msg.sender] = totalGame;
         gameLogMap[totalGame].startTime = block.timestamp;
         gameLogMap[totalGame].player = msg.sender;
@@ -123,7 +153,7 @@ contract ZKGameClient is Ownable {
     }
 
     function reLive() public payable {
-        uint gasTokenAmountToPay = getGasTokenAmountByUsd(5); // $5
+        uint gasTokenAmountToPay = 5*10**15; // 0.005
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
         address payable top1Player = payable(topPlayerList[0]);
         if(top1Player != address(0)) {
@@ -131,11 +161,13 @@ contract ZKGameClient is Ownable {
         }
     }
 
-    // function testWeaponSkin() external  {
-    //     playerWeaponMap[msg.sender].push(5);
-    //     playerWeaponMap[msg.sender].push(15);
-    //     playerSkinMap[msg.sender].push(2);
-    // }
+    function testWeaponSkin() external onlyOwner {
+        playerWeaponMap[msg.sender].push(5);
+        playerWeaponMap[msg.sender].push(15);
+        playerSkinMap[msg.sender].push(2);
+        playerGoldMap[msg.sender] = 999999;
+        playerDiamondMap[msg.sender] = 999999;
+    }
 
     function getPlayerAllWeaponInfo(address player) external view returns(uint[] memory weaponIdList, uint[] memory weaponLevelList) {
         weaponIdList = playerWeaponMap[player];
@@ -164,9 +196,28 @@ contract ZKGameClient is Ownable {
             }
         }
         if(found || id == 0) {
+            // upgrade
+            uint currentLevel = playerSkinLevelMap[msg.sender][id];
+            require(currentLevel < skinLevelPriceList.length -1, "Your skin is reached the highest level");
+            uint goldPrice = skinLevelPriceList[currentLevel+1];
+            uint goldNum = playerGoldMap[msg.sender];
+            require(goldNum >= goldPrice, 'Your gold is not enough!');
+            playerGoldMap[msg.sender] -= goldPrice;
             playerSkinLevelMap[msg.sender][id]++;
         } else {
-            playerSkinMap[msg.sender].push(id);
+            // buy
+            PriceItem memory priceItem = skinPriceMap[id];
+            if(priceItem.priceType == 0) {
+                uint goldNum = playerGoldMap[msg.sender];
+                require(goldNum >= priceItem.price, 'Your gold is not enough!');
+                playerGoldMap[msg.sender] -= priceItem.price;
+                playerSkinMap[msg.sender].push(id);
+            } else if(priceItem.priceType == 1) {
+                uint diamondNum =  playerDiamondMap[msg.sender];
+                require(diamondNum >= priceItem.price, 'Your diamond is not enough!');
+                playerDiamondMap[msg.sender] -= priceItem.price;
+                playerSkinMap[msg.sender].push(id);
+            }
         }
     }
 
@@ -179,14 +230,33 @@ contract ZKGameClient is Ownable {
             }
         }
         if(found || id == 0) {
+            // upgrade
+            uint currentLevel = playerWeaponLevelMap[msg.sender][id];
+            require(currentLevel < weaponLevelPriceList.length -1, "Your weapon is reached the highest level");
+            uint goldPrice = weaponLevelPriceList[currentLevel+1];
+            uint goldNum = playerGoldMap[msg.sender];
+            require(goldNum >= goldPrice, 'Your gold is not enough!');
+            playerGoldMap[msg.sender] -= goldPrice;
             playerWeaponLevelMap[msg.sender][id]++;
         } else {
-            playerWeaponMap[msg.sender].push(id);
+            // buy
+            PriceItem memory priceItem = weaponPriceMap[id];
+            if(priceItem.priceType == 0) {
+                uint goldNum = playerGoldMap[msg.sender];
+                require(goldNum >= priceItem.price, 'Your gold is not enough!');
+                playerGoldMap[msg.sender] -= priceItem.price;
+                playerWeaponMap[msg.sender].push(id);
+            } else if(priceItem.priceType == 1) {
+                uint diamondNum =  playerDiamondMap[msg.sender];
+                require(diamondNum >= priceItem.price, 'Your diamond is not enough!');
+                playerDiamondMap[msg.sender] -= priceItem.price;
+                playerWeaponMap[msg.sender].push(id);
+            }
         }
     }
 
     function mintGold()  external payable {
-        uint gasTokenAmountToPay = getGasTokenAmountByUsd(1); // $1
+        uint gasTokenAmountToPay = 10**15; // 0.001
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
         playerGoldMap[msg.sender] += 500;
     }
@@ -199,7 +269,7 @@ contract ZKGameClient is Ownable {
     // lottery
     function requestLottery() external payable {
         // pay
-        uint gasTokenAmountToPay = getGasTokenAmountByUsd(4); // $4
+        uint gasTokenAmountToPay = 4*10**15; // 0.004
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
 
         totalLotteryTimes = totalLotteryTimes + 1;

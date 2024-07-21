@@ -4,7 +4,7 @@ import {
   useActiveWalletChain,
   useConnectedWallets,
 } from "thirdweb/react";
-import { client, GameContract } from "./client";
+import { client, GameContract, thetaTestnet } from "./client";
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import {
   prepareContractCall,
@@ -13,7 +13,6 @@ import {
   waitForReceipt,
 } from "thirdweb";
 import { useEffect } from "react";
-import { baseSepolia } from "thirdweb/chains";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 
 const wallets = [
@@ -39,7 +38,7 @@ export function App() {
   }, [wallet]);
 
   useEffect(() => {
-    if (chainId?.id == baseSepolia.id) {
+    if (chainId?.id == thetaTestnet.id) {
       window.isBaseSepoliaNetwork = true;
     } else {
       window.isBaseSepoliaNetwork = false;
@@ -387,7 +386,7 @@ export function App() {
   return (
     <main>
       <div style={{ display: "none" }}>
-        <ConnectButton client={client} wallets={wallets} chain={baseSepolia} />
+        <ConnectButton client={client} wallets={wallets} chain={thetaTestnet} />
       </div>
     </main>
   );
