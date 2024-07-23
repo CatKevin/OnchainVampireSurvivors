@@ -18,8 +18,8 @@ import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 const wallets = [
   inAppWallet(),
   createWallet("io.metamask"),
+  createWallet("org.thetatoken"),
   createWallet("com.coinbase.wallet"),
-  createWallet("me.rainbow"),
 ];
 
 export function App() {
