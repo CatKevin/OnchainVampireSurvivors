@@ -757,7 +757,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 252.08,
+      "width": 307.68,
       "height": 62.4
     },
     "_anchorPoint": {
@@ -809,8 +809,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Pay 4 TFUEL",
-    "_N$string": "Pay 4 TFUEL",
+    "_string": "Pay 0.04 tCORE",
+    "_N$string": "Pay 0.04 tCORE",
     "_fontSize": 40,
     "_lineHeight": 40,
     "_enableWrapText": true,
