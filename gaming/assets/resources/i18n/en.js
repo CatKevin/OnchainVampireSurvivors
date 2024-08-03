@@ -60,7 +60,7 @@ window.i18n.languages.en = {
         gjfw: 'Attack Range:',
         dyl: 'Bullets:',
         gqjl: 'Level Rewards',
-        ksyx: 'Star Game',
+        ksyx: 'Start Game',
     },
     
     try: {
