@@ -3,13 +3,6 @@ pragma solidity 0.8.19;
 
 import "@thirdweb-dev/contracts/extension/Ownable.sol";
 
-interface AggregatorV3Interface {
-  function latestRoundData()
-    external
-    view
-    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
-}
-
 interface IUltraVerifier {
     function getVerificationKeyHash() external pure returns (bytes32);
 
@@ -53,9 +46,7 @@ contract ZKGameClient is Ownable {
         uint grade,
         uint reLive
     );
-
-    address public gasTokenAggregator = 0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1; // Base Sepolia testnet ETH/USD;
-
+    
     // Lottery
     uint256 public totalLotteryTimes = 0;
     LotteryItem[] public LotteryItemList;
@@ -101,13 +92,6 @@ contract ZKGameClient is Ownable {
         LotteryItemList.push(LotteryItem(3,9));
     }
 
-    // eg. 3000usdt = 1 eth = 10**18
-    // current eth price: $3000, if usd = 3000, then you will get 10**18
-    function getGasTokenAmountByUsd(uint usd) public view returns(uint) {
-        (, int256 price, , , ) = AggregatorV3Interface(gasTokenAggregator).latestRoundData();
-        return usd * uint((10**18/price) * 10**8); // will not overflow, when eth price is under $10**10
-    }
-
     function distribution(address payable winner, uint amount) internal {
         winner.transfer(amount);
     }
@@ -123,7 +107,7 @@ contract ZKGameClient is Ownable {
     }
 
     function reLive() public payable {
-        uint gasTokenAmountToPay = getGasTokenAmountByUsd(5); // $5
+        uint gasTokenAmountToPay = 5*10**15; // 0.005
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
         address payable top1Player = payable(topPlayerList[0]);
         if(top1Player != address(0)) {
@@ -186,7 +170,7 @@ contract ZKGameClient is Ownable {
     }
 
     function mintGold()  external payable {
-        uint gasTokenAmountToPay = getGasTokenAmountByUsd(1); // $1
+        uint gasTokenAmountToPay = 10**15; // 0.001
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
         playerGoldMap[msg.sender] += 500;
     }
@@ -199,7 +183,7 @@ contract ZKGameClient is Ownable {
     // lottery
     function requestLottery() external payable {
         // pay
-        uint gasTokenAmountToPay = getGasTokenAmountByUsd(4); // $4
+        uint gasTokenAmountToPay = 4*10**15; // 0.004
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
 
         totalLotteryTimes = totalLotteryTimes + 1;

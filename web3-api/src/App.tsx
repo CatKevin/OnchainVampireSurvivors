@@ -1,53 +1,19 @@
-import {
-  ConnectButton,
-  useActiveWallet,
-  useActiveWalletChain,
-  useConnectedWallets,
-} from "thirdweb/react";
-import { client, getGameContract, initMetaMaskWeb3 } from "./client";
-import { createWallet, inAppWallet } from "thirdweb/wallets";
-import {
-  prepareContractCall,
-  readContract,
-  sendTransaction,
-  waitForReceipt,
-} from "thirdweb";
-import { useEffect, useState } from "react";
-import { baseSepolia } from "thirdweb/chains";
-import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
-import Web3 from "web3";
 
-const wallets = [
-  inAppWallet(),
-  createWallet("io.metamask"),
-  createWallet("com.coinbase.wallet"),
-  createWallet("me.rainbow"),
-];
+import { getGameContract, initMetaMaskWeb3 } from "./client";
+import { createWallet, inAppWallet } from "thirdweb/wallets";
+import { useEffect, useState } from "react";
 
 export function App() {
-  window.thirdwebClient = client;
-
-  const wallet = useActiveWallet();
-  const chainId = useActiveWalletChain();
-
   const [account, setAccount] = useState<String | null>(null);
 
   useEffect(() => {
     console.log("window.userAccount:", window.userAccount);
-    if (wallet) {
-      window.userAccount = wallet.getAccount()?.address;
+    if (account != null && account !== "") {
+      window.userAccount = account;
     } else {
       window.userAccount = undefined;
     }
-  }, [wallet]);
-
-  useEffect(() => {
-    if (chainId?.id == baseSepolia.id) {
-      window.isBaseSepoliaNetwork = true;
-    } else {
-      window.isBaseSepoliaNetwork = false;
-    }
-  }, [chainId]);
+  }, [account]);
 
   /// ###########################################
   /// wallet connect
@@ -233,12 +199,11 @@ export function App() {
   ) => {
     const gameContract = getGameContract();
     if (account != null && gameContract) {
-      let gasTokenAmount = await gameContract.methods.getGasTokenAmountByUsd(4).call();
       await gameContract.methods
         .requestLottery()
         .send({
           from: account,
-          value: gasTokenAmount,
+          value: 4*(10**15),
         })
         .on("receipt", function (receipt: any) {
           console.log(receipt);
@@ -258,12 +223,11 @@ export function App() {
   ) => {
     const gameContract = getGameContract();
     if (account != null && gameContract) {
-      let gasTokenAmount = await gameContract.methods.getGasTokenAmountByUsd(1).call();
       await gameContract.methods
         .mintGold()
         .send({
           from: account,
-          value: gasTokenAmount,
+          value: (10**15),
         })
         .on("receipt", function (receipt: any) {
           console.log(receipt);
@@ -283,12 +247,11 @@ export function App() {
   ) => {
     const gameContract = getGameContract();
     if (account != null && gameContract) {
-      let gasTokenAmount = await gameContract.methods.getGasTokenAmountByUsd(5).call();
       await gameContract.methods
         .reLive()
         .send({
           from: account,
-          value: gasTokenAmount,
+          value: 5*(10**15),
         })
         .on("receipt", function (receipt: any) {
           console.log(receipt);
@@ -312,6 +275,11 @@ export function App() {
 
   return (
     <main>
+      {/* <button onClick={() => onConnectButtonClick()}>init</button>
+      <br/>
+      <button onClick={() => getTopListInfo((resp: any) => console.log(resp))}>getTopListInfo</button>
+      <br/>
+      <button onClick={() => startGame()}>startGame</button> */}
       <div style={{ display: "none" }}>
         {/* <ConnectButton client={client} wallets={wallets} chain={move_evm} /> */}
       </div>
