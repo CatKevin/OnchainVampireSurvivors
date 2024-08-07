@@ -12,6 +12,11 @@ module.exports = {
     },
   },
   networks: {
+    move_evm: {
+      url: "https://mevm.devnet.m1.movementlabs.xyz",
+      ethNetwork: "move-evm",
+      chainId: 336,
+    },
     zksync_testnet: {
       url: "https://zksync2-testnet.zksync.dev",
       ethNetwork: "goerli",
