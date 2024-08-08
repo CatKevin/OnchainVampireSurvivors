@@ -18,7 +18,6 @@ import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 const wallets = [
   inAppWallet(),
   createWallet("io.metamask"),
-  createWallet("org.thetatoken"),
   createWallet("com.coinbase.wallet"),
 ];
 
@@ -157,7 +156,7 @@ export function App() {
         contract: GameContract,
         method: "function startGame() payable", 
         params: [],
-        value: BigInt(10**18), // gas token amount for payable function
+        value: BigInt(10**16), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
@@ -278,7 +277,7 @@ export function App() {
         contract: GameContract,
         method: "function requestLottery() payable", 
         params: [] ,
-        value: BigInt(4*(10**18)), // gas token amount for payable function
+        value: BigInt(4*(10**16)), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
@@ -308,7 +307,7 @@ export function App() {
         contract: GameContract,
         method: "function mintGold() payable", 
         params: [],
-        value: BigInt(10**18), // gas token amount for payable function
+        value: BigInt(10**16), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
@@ -338,7 +337,7 @@ export function App() {
         contract: GameContract,
         method: "function reLive() payable", 
         params: [],
-        value: BigInt(5*(10**18)), // gas token amount for payable function
+        value: BigInt(5*(10**16)), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
