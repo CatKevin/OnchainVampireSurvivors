@@ -145,19 +145,35 @@ contract ZKGameClient is Ownable {
         winner.transfer(amount);
     }
 
-    function startGame() public {
+    function startGame() public payable {
+        // pay gas token
+        uint gasTokenAmountToPay = 10**18; // 1 TFUEL
+        require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
+
+        // save log
         playerLatestGameLogIdMap[msg.sender] = totalGame;
         gameLogMap[totalGame].startTime = block.timestamp;
         gameLogMap[totalGame].player = msg.sender;
         totalGame = totalGame + 1;
+
+        // distribution
+        address payable top1Player = payable(topPlayerList[0]);
+        uint balance = address(this).balance;
+        if(balance >0 && top1Player != address(0)) {
+            distribution(top1Player, balance);
+        }
     }
 
     function reLive() public payable {
-        uint gasTokenAmountToPay = 5*10**15; // 0.005
+        // pay gas token
+        uint gasTokenAmountToPay = 5*10**18; // 5 TFUEL
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
+
+        // distribution
         address payable top1Player = payable(topPlayerList[0]);
-        if(top1Player != address(0)) {
-            distribution(top1Player, gasTokenAmountToPay);
+        uint balance = address(this).balance;
+        if(balance >0 && top1Player != address(0)) {
+            distribution(top1Player, balance);
         }
     }
 
@@ -256,7 +272,8 @@ contract ZKGameClient is Ownable {
     }
 
     function mintGold()  external payable {
-        uint gasTokenAmountToPay = 10**15; // 0.001
+        // pay gas token
+        uint gasTokenAmountToPay = 10**18; // 1 TFUEL
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
         playerGoldMap[msg.sender] += 500;
     }
@@ -268,8 +285,8 @@ contract ZKGameClient is Ownable {
 
     // lottery
     function requestLottery() external payable {
-        // pay
-        uint gasTokenAmountToPay = 4*10**15; // 0.004
+        // pay gas token
+        uint gasTokenAmountToPay = 4*10**18; // 4 TFUEL
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
 
         totalLotteryTimes = totalLotteryTimes + 1;
@@ -286,12 +303,15 @@ contract ZKGameClient is Ownable {
 
         // distribution rewards
         if(item.itemType == 0) {
+            // mint gold
             playerGoldMap[msg.sender] += item.num;
         } else if(item.itemType == 1) {
+            // mint diamond
             playerDiamondMap[msg.sender] += item.num;
         } else if(item.itemType == 2) {
-            // TODO
+            // TODO: mint skin
         } else if(item.itemType == 3) {
+            // mint weapon
             playerWeaponMap[msg.sender].push(item.num);
         }
 
@@ -323,6 +343,11 @@ contract ZKGameClient is Ownable {
         gameLogMap[logId].endTime = block.timestamp;
         gameLogMap[logId].grade = time;
         pushDataToTopList(MessageItem(msg.sender,time, kills));
+
+        // mint gold
+        if(kills > 0) {
+            playerGoldMap[msg.sender] += kills;
+        }
 
         emit GameLogEvent(
             gameLogMap[logId].startTime,

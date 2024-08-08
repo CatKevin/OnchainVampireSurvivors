@@ -25,7 +25,7 @@ export const client = createThirdwebClient({
 export const GameContract = getContract({
   client,
   chain: thetaTestnet,
-  address: "0x734c49c022c0013d8c852f53beed924534b2e3a6", // ZKGameClient contract
+  address: "0x61e95dd9a59772abcfcd3e3244468f9ebef4ef1f", // ZKGameClient contract
 });
 
 window.thirdwebClient = client;

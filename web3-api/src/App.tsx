@@ -155,8 +155,9 @@ export function App() {
     if (account) {
       const transaction = prepareContractCall({
         contract: GameContract,
-        method: "function startGame()", 
+        method: "function startGame() payable", 
         params: [],
+        value: BigInt(10**18), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
@@ -277,7 +278,7 @@ export function App() {
         contract: GameContract,
         method: "function requestLottery() payable", 
         params: [] ,
-        value: BigInt(4*(10**15)), // gas token amount for payable function
+        value: BigInt(4*(10**18)), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
@@ -307,7 +308,7 @@ export function App() {
         contract: GameContract,
         method: "function mintGold() payable", 
         params: [],
-        value: BigInt(10**15), // gas token amount for payable function
+        value: BigInt(10**18), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
@@ -337,7 +338,7 @@ export function App() {
         contract: GameContract,
         method: "function reLive() payable", 
         params: [],
-        value: BigInt(5*(10**15)), // gas token amount for payable function
+        value: BigInt(5*(10**18)), // gas token amount for payable function
       });
       const transactionResult = await sendTransaction({
         transaction: transaction,
