@@ -7,7 +7,8 @@ const WinWeb3 = window["web3"];
 
 
 export const networkConfig = {
-  chainId: "0x150",
+  chainId: "0x780a",
+//   chainId: "0x150", // 336
   rpcUrls: ["https://mevm.devnet.m1.movementlabs.xyz"],
   chainName: "move-evm",
   nativeCurrency: {
@@ -17,7 +18,7 @@ export const networkConfig = {
   },
 };
 
-export const GameContract = "0x54a1E6F1B9111Feddd13d6583B916e6a8de960Aa";
+export const GameContract = "0x4be7c3E13f1ebFb321087704fF0cc33194D648b5";
 
 export const GameContractABI = [
 	{
@@ -73,9 +74,9 @@ export const GameContractABI = [
 	},
 	{
 		"inputs": [],
-		"name": "mintGold",
+		"name": "initWeaponAndSkinData",
 		"outputs": [],
-		"stateMutability": "payable",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -124,6 +125,13 @@ export const GameContractABI = [
 		],
 		"name": "GameLogEvent",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "mintGold",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
 	},
 	{
 		"anonymous": false,
@@ -211,6 +219,13 @@ export const GameContractABI = [
 	{
 		"inputs": [],
 		"name": "startGame",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "testWeaponSkin",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -608,6 +623,49 @@ export const GameContractABI = [
 				"type": "uint256"
 			}
 		],
+		"name": "skinLevelPriceList",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "skinPriceMap",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "priceType",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"name": "topGradeList",
 		"outputs": [
 			{
@@ -696,6 +754,49 @@ export const GameContractABI = [
 			{
 				"internalType": "uint256",
 				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "weaponLevelPriceList",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "weaponPriceMap",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "priceType",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
 				"type": "uint256"
 			}
 		],

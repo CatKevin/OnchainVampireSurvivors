@@ -2,6 +2,7 @@
 import { getGameContract, initMetaMaskWeb3 } from "./client";
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { useEffect, useState } from "react";
+import Web3 from "web3";
 
 export function App() {
   const [account, setAccount] = useState<String | null>(null);
@@ -275,6 +276,13 @@ export function App() {
 
   return (
     <main>
+      {/* <button onClick={async () => {
+          const provider = new Web3.providers.HttpProvider("https://mevm.devnet.m1.movementlabs.xyz");
+          let web3 = new Web3(provider);
+          let chainId = await web3.eth.getChainId();
+          console.log("chainId: ",chainId )
+      }}>getTopListInfo</button> */}
+    
       {/* <button onClick={() => onConnectButtonClick()}>init</button>
       <br/>
       <button onClick={() => getTopListInfo((resp: any) => console.log(resp))}>getTopListInfo</button>
