@@ -150,28 +150,35 @@ export function App() {
     onSuccess?: (receipt: any) => void,
     onError?: (receipt: any) => void
   ) => {
-    let account = wallet?.getAccount();
-    if (account) {
-      const transaction = prepareContractCall({
-        contract: GameContract,
-        method: "function startGame() payable", 
-        params: [],
-        value: BigInt(10**16), // gas token amount for payable function
-      });
-      const transactionResult = await sendTransaction({
-        transaction: transaction,
-        account: account,
-      });
-      const receipt: TransactionReceipt = await waitForReceipt(
-        transactionResult
-      );
-      switch (receipt.status) {
-        case "success":
-          onSuccess?.(receipt);
-          break;
-        case "reverted":
-          onError?.(receipt);
-          break;
+    try {
+      let account = wallet?.getAccount();
+      if (account) {
+        const transaction = prepareContractCall({
+          contract: GameContract,
+          method: "function startGame() payable", 
+          params: [],
+          value: BigInt(10**16), // gas token amount for payable function
+        });
+        const transactionResult = await sendTransaction({
+          transaction: transaction,
+          account: account,
+        });
+        const receipt: TransactionReceipt = await waitForReceipt(
+          transactionResult
+        );
+        switch (receipt.status) {
+          case "success":
+            onSuccess?.(receipt);
+            break;
+          case "reverted":
+            onError?.(receipt);
+            break;
+        }
+      }
+    } catch(e: any) {
+      let message = e["message"];
+      if(message != null && message != undefined && message !== "") {
+        alert(message);
       }
     }
   };
@@ -182,27 +189,34 @@ export function App() {
     onSuccess?: (receipt: any) => void,
     onError?: (receipt: any) => void
   ) => {
-    let account = wallet?.getAccount();
-    if (account) {
-      const transaction = prepareContractCall({
-        contract: GameContract,
-        method: "function gameOver(uint256 time, uint256 kills)", 
-        params: [time, kills] 
-      });
-      const transactionResult = await sendTransaction({
-        transaction: transaction,
-        account: account,
-      });
-      const receipt: TransactionReceipt = await waitForReceipt(
-        transactionResult
-      );
-      switch (receipt.status) {
-        case "success":
-          onSuccess?.(receipt);
-          break;
-        case "reverted":
-          onError?.(receipt);
-          break;
+    try {
+      let account = wallet?.getAccount();
+      if (account) {
+        const transaction = prepareContractCall({
+          contract: GameContract,
+          method: "function gameOver(uint256 time, uint256 kills)", 
+          params: [time, kills] 
+        });
+        const transactionResult = await sendTransaction({
+          transaction: transaction,
+          account: account,
+        });
+        const receipt: TransactionReceipt = await waitForReceipt(
+          transactionResult
+        );
+        switch (receipt.status) {
+          case "success":
+            onSuccess?.(receipt);
+            break;
+          case "reverted":
+            onError?.(receipt);
+            break;
+        }
+      }
+    } catch(e: any) {
+      let message = e["message"];
+      if(message != null && message != undefined && message !== "") {
+        alert(message);
       }
     }
   };
@@ -212,27 +226,34 @@ export function App() {
     onSuccess?: (receipt: any) => void,
     onError?: (receipt: any) => void
   ) => {
-    let account = wallet?.getAccount();
-    if (account) {
-      const transaction = prepareContractCall({
-        contract: GameContract,
-        method: "function buyOrUpgradeSkin(uint256 id)", 
-        params: [id] 
-      });
-      const transactionResult = await sendTransaction({
-        transaction: transaction,
-        account: account,
-      });
-      const receipt: TransactionReceipt = await waitForReceipt(
-        transactionResult
-      );
-      switch (receipt.status) {
-        case "success":
-          onSuccess?.(receipt);
-          break;
-        case "reverted":
-          onError?.(receipt);
-          break;
+    try {
+      let account = wallet?.getAccount();
+      if (account) {
+        const transaction = prepareContractCall({
+          contract: GameContract,
+          method: "function buyOrUpgradeSkin(uint256 id)", 
+          params: [id] 
+        });
+        const transactionResult = await sendTransaction({
+          transaction: transaction,
+          account: account,
+        });
+        const receipt: TransactionReceipt = await waitForReceipt(
+          transactionResult
+        );
+        switch (receipt.status) {
+          case "success":
+            onSuccess?.(receipt);
+            break;
+          case "reverted":
+            onError?.(receipt);
+            break;
+        }
+      }
+    } catch(e: any) {
+      let message = e["message"];
+      if(message != null && message != undefined && message !== "") {
+        alert(message);
       }
     }
   };
@@ -242,27 +263,34 @@ export function App() {
     onSuccess?: (receipt: any) => void,
     onError?: (receipt: any) => void
   ) => {
-    let account = wallet?.getAccount();
-    if (account) {
-      const transaction = prepareContractCall({
-        contract: GameContract,
-        method: "function buyOrUpgradeWeapon(uint256 id)", 
-        params: [id] 
-      });
-      const transactionResult = await sendTransaction({
-        transaction: transaction,
-        account: account,
-      });
-      const receipt: TransactionReceipt = await waitForReceipt(
-        transactionResult
-      );
-      switch (receipt.status) {
-        case "success":
-          onSuccess?.(receipt);
-          break;
-        case "reverted":
-          onError?.(receipt);
-          break;
+    try {
+      let account = wallet?.getAccount();
+      if (account) {
+        const transaction = prepareContractCall({
+          contract: GameContract,
+          method: "function buyOrUpgradeWeapon(uint256 id)", 
+          params: [id] 
+        });
+        const transactionResult = await sendTransaction({
+          transaction: transaction,
+          account: account,
+        });
+        const receipt: TransactionReceipt = await waitForReceipt(
+          transactionResult
+        );
+        switch (receipt.status) {
+          case "success":
+            onSuccess?.(receipt);
+            break;
+          case "reverted":
+            onError?.(receipt);
+            break;
+        }
+      }
+    } catch(e: any) {
+      let message = e["message"];
+      if(message != null && message != undefined && message !== "") {
+        alert(message);
       }
     }
   };
@@ -271,28 +299,35 @@ export function App() {
     onSuccess?: (receipt: any) => void,
     onError?: (receipt: any) => void
   ) => {
-    let account = wallet?.getAccount();
-    if (account) {
-      const transaction = await prepareContractCall({
-        contract: GameContract,
-        method: "function requestLottery() payable", 
-        params: [] ,
-        value: BigInt(4*(10**16)), // gas token amount for payable function
-      });
-      const transactionResult = await sendTransaction({
-        transaction: transaction,
-        account: account,
-      });
-      const receipt: TransactionReceipt = await waitForReceipt(
-        transactionResult
-      );
-      switch (receipt.status) {
-        case "success":
-          onSuccess?.(receipt);
-          break;
-        case "reverted":
-          onError?.(receipt);
-          break;
+    try {
+      let account = wallet?.getAccount();
+      if (account) {
+        const transaction = await prepareContractCall({
+          contract: GameContract,
+          method: "function requestLottery() payable", 
+          params: [] ,
+          value: BigInt(4*(10**16)), // gas token amount for payable function
+        });
+        const transactionResult = await sendTransaction({
+          transaction: transaction,
+          account: account,
+        });
+        const receipt: TransactionReceipt = await waitForReceipt(
+          transactionResult
+        );
+        switch (receipt.status) {
+          case "success":
+            onSuccess?.(receipt);
+            break;
+          case "reverted":
+            onError?.(receipt);
+            break;
+        }
+      }
+    } catch(e: any) {
+      let message = e["message"];
+      if(message != null && message != undefined && message !== "") {
+        alert(message);
       }
     }
   };
@@ -301,28 +336,35 @@ export function App() {
     onSuccess?: (receipt: any) => void,
     onError?: (receipt: any) => void
   ) => {
-    let account = wallet?.getAccount();
-    if (account) {
-      const transaction = await prepareContractCall({
-        contract: GameContract,
-        method: "function mintGold() payable", 
-        params: [],
-        value: BigInt(10**16), // gas token amount for payable function
-      });
-      const transactionResult = await sendTransaction({
-        transaction: transaction,
-        account: account,
-      });
-      const receipt: TransactionReceipt = await waitForReceipt(
-        transactionResult
-      );
-      switch (receipt.status) {
-        case "success":
-          onSuccess?.(receipt);
-          break;
-        case "reverted":
-          onError?.(receipt);
-          break;
+    try {
+      let account = wallet?.getAccount();
+      if (account) {
+        const transaction = await prepareContractCall({
+          contract: GameContract,
+          method: "function mintGold() payable", 
+          params: [],
+          value: BigInt(10**16), // gas token amount for payable function
+        });
+        const transactionResult = await sendTransaction({
+          transaction: transaction,
+          account: account,
+        });
+        const receipt: TransactionReceipt = await waitForReceipt(
+          transactionResult
+        );
+        switch (receipt.status) {
+          case "success":
+            onSuccess?.(receipt);
+            break;
+          case "reverted":
+            onError?.(receipt);
+            break;
+        }
+      }
+    } catch(e: any) {
+      let message = e["message"];
+      if(message != null && message != undefined && message !== "") {
+        alert(message);
       }
     }
   };
@@ -331,28 +373,35 @@ export function App() {
     onSuccess?: (receipt: any) => void,
     onError?: (receipt: any) => void
   ) => {
-    let account = wallet?.getAccount();
-    if (account) {
-      const transaction = await prepareContractCall({
-        contract: GameContract,
-        method: "function reLive() payable", 
-        params: [],
-        value: BigInt(5*(10**16)), // gas token amount for payable function
-      });
-      const transactionResult = await sendTransaction({
-        transaction: transaction,
-        account: account,
-      });
-      const receipt: TransactionReceipt = await waitForReceipt(
-        transactionResult
-      );
-      switch (receipt.status) {
-        case "success":
-          onSuccess?.(receipt);
-          break;
-        case "reverted":
-          onError?.(receipt);
-          break;
+    try {
+      let account = wallet?.getAccount();
+      if (account) {
+        const transaction = await prepareContractCall({
+          contract: GameContract,
+          method: "function reLive() payable", 
+          params: [],
+          value: BigInt(5*(10**16)), // gas token amount for payable function
+        });
+        const transactionResult = await sendTransaction({
+          transaction: transaction,
+          account: account,
+        });
+        const receipt: TransactionReceipt = await waitForReceipt(
+          transactionResult
+        );
+        switch (receipt.status) {
+          case "success":
+            onSuccess?.(receipt);
+            break;
+          case "reverted":
+            onError?.(receipt);
+            break;
+        }
+      }
+    } catch(e: any) {
+      let message = e["message"];
+      if(message != null && message != undefined && message !== "") {
+        alert(message);
       }
     }
   };
