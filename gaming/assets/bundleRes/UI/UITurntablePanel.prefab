@@ -757,8 +757,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 316.61,
-      "height": 62.4
+      "width": 128.72,
+      "height": 87.6
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -809,10 +809,10 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Pay 0.004 $MOV",
-    "_N$string": "Pay 0.004 $MOV",
-    "_fontSize": 40,
-    "_lineHeight": 40,
+    "_string": "Play",
+    "_N$string": "Play",
+    "_fontSize": 60,
+    "_lineHeight": 60,
     "_enableWrapText": true,
     "_N$file": null,
     "_isSystemFontUsed": true,
