@@ -33,6 +33,20 @@ export const bobTestnet = defineChain({
   testnet: true,
 });
 
+export const zkBTCDevnet = defineChain({
+  id: 19236265,
+  name: "zkBTC devnet",
+  rpc: "https://devilmorallyelephant-rpc.eu-north-2.gateway.fm",
+  nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+  blockExplorers: [
+    {
+      name: "zkBTC devilmorallyelephant explorer",
+      url: "https://devilmorallyelephant-blockscout.eu-north-2.gateway.fm",
+    },
+  ],
+  testnet: true,
+});
+
 export const client = createThirdwebClient({
   clientId: clientId,
 });
@@ -49,12 +63,20 @@ export const bobTestnetGameContract = getContract({
   address: "0xD268c248f82217df2140fB6Ff9e2ddbD858925aa", // Bob testnet
 });
 
+export const zkBTCDevnetGameContract = getContract({
+  client,
+  chain: zkBTCDevnet,
+  address: "0xD268c248f82217df2140fB6Ff9e2ddbD858925aa", // zkBTC Devnet
+});
+
 export const getGameContract = (chain: String | null) => {
   switch(chain) {
     case "MerlinTestnet":
       return merlinTestnetGameContract;
     case "BobTestnet":
       return bobTestnetGameContract;
+    case "zkBTCDevnet":
+      return zkBTCDevnetGameContract;
     default:
       return merlinTestnetGameContract;
   }

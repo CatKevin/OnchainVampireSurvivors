@@ -290,14 +290,24 @@ export default class UIHomePage extends UIPage {
 
   protected onOpen() {
     let wallet_icon = cc.find("BtnWallet/icon", this._page);
-    switch(window.currentChain) {
+    switch (window.currentChain) {
       case "MerlinTestnet":
-        wallet_icon.getComponent(cc.Sprite).spriteFrame =
-        cocosz.resMgr.getRes("merlin_logo", cc.SpriteFrame);
+        wallet_icon.getComponent(cc.Sprite).spriteFrame = cocosz.resMgr.getRes(
+          "merlin_logo",
+          cc.SpriteFrame
+        );
         break;
       case "BobTestnet":
-        wallet_icon.getComponent(cc.Sprite).spriteFrame =
-        cocosz.resMgr.getRes("bob_logo", cc.SpriteFrame);
+        wallet_icon.getComponent(cc.Sprite).spriteFrame = cocosz.resMgr.getRes(
+          "bob_logo",
+          cc.SpriteFrame
+        );
+        break;
+      case "zkBTCDevnet":
+        wallet_icon.getComponent(cc.Sprite).spriteFrame = cocosz.resMgr.getRes(
+          "btc_logo",
+          cc.SpriteFrame
+        );
         break;
     }
 
@@ -340,12 +350,15 @@ export default class UIHomePage extends UIPage {
 
     switch (event.target.name) {
       case "BtnGameStart": {
-        if(window.startGame != null) {
-          window.startGame(()=>{
-            cocosz.gameMgr.gameStart(cocosz.getLevelId())
-          }, ()=>{
-            alert('Start Game Failed!');
-          });
+        if (window.startGame != null) {
+          window.startGame(
+            () => {
+              cocosz.gameMgr.gameStart(cocosz.getLevelId());
+            },
+            () => {
+              alert("Start Game Failed!");
+            }
+          );
         }
         break;
       }
@@ -365,10 +378,7 @@ export default class UIHomePage extends UIPage {
         let showSKinKey = `${this._showSkinId + 1}`;
         if (showSkinInfo.State == 0) {
           if (GameDate.SkinMess[showSKinKey].priceType == PriceType.Gold) {
-            if (
-              cocosz.web3Mgr.gold >=
-              GameDate.SkinMess[showSKinKey].price
-            ) {
+            if (cocosz.web3Mgr.gold >= GameDate.SkinMess[showSKinKey].price) {
               this._aniEffect(2);
               window.buyOrUpgradeSkin(
                 BigInt(this._showSkinId),
@@ -538,7 +548,7 @@ export default class UIHomePage extends UIPage {
       }
       case "BtnWeapon": {
         window.getPlayerAllWeaponInfo((result) => {
-          console.log(result)
+          console.log(result);
           let weaponIdList = result[0];
           let weaponLevelList = result[1];
           for (let i = 0; i < weaponIdList.length; i++) {

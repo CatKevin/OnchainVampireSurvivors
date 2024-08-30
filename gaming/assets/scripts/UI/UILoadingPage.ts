@@ -21,6 +21,7 @@ export default class UILoadingPage extends UIPage {
 
   private _btnMerlinTestnet: cc.Node = null;
   private _btnBobTestnet: cc.Node = null;
+  private _btnZkBTCDevnet: cc.Node = null;
 
   private _wallet_icon: cc.Node = null;
   private _wallet_name: cc.Node = null;
@@ -41,6 +42,7 @@ export default class UILoadingPage extends UIPage {
       "BtnStartGame",
       "BtnSelectNetwork/frame_set/BtnMerlinTestnet",
       "BtnSelectNetwork/frame_set/BtnBobTestnet",
+      "BtnSelectNetwork/frame_set/BtnZkBTCDevnet",
     ];
     btnNames.forEach((name) => {
       let btn: cc.Node = cc.find(name, this._page);
@@ -58,6 +60,8 @@ export default class UILoadingPage extends UIPage {
           this._btnMerlinTestnet = btn;
         } else if (btn.name == "BtnBobTestnet") {
           this._btnBobTestnet = btn;
+        } else if (btn.name == "BtnZkBTCDevnet") {
+          this._btnZkBTCDevnet = btn;
         }
       }
     });
@@ -101,6 +105,13 @@ export default class UILoadingPage extends UIPage {
                 this._wallet_icon.getComponent(cc.Sprite).spriteFrame =
                 cocosz.resMgr.getRes("bob_logo", cc.SpriteFrame);
                 this._network_name.getComponent(cc.Label).string = "BOB Sepolia testnet";
+                break;
+              case "zkBTCDevnet":
+                this._network_icon.getComponent(cc.Sprite).spriteFrame =
+                cocosz.resMgr.getRes("btc_logo", cc.SpriteFrame);
+                this._wallet_icon.getComponent(cc.Sprite).spriteFrame =
+                cocosz.resMgr.getRes("btc_logo", cc.SpriteFrame);
+                this._network_name.getComponent(cc.Label).string = "zkBTC devnet";
                 break;
             }
           }
@@ -187,6 +198,11 @@ export default class UILoadingPage extends UIPage {
       case "BtnBobTestnet": {
         this.handleSelectNetwork();
         window.selectNetwork("BobTestnet");
+        break;
+      }
+      case "BtnZkBTCDevnet": {
+        this.handleSelectNetwork();
+        window.selectNetwork("zkBTCDevnet");
         break;
       }
     }
