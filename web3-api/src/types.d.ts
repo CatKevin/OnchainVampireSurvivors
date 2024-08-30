@@ -7,6 +7,8 @@ interface Window {
   onConnectButtonClick: Function;
   onConnectedButtonClick: Function;
   storageContract: Readonly<ContractOptions<[]>>;
+  currentChain?: String;
+  selectNetwork: (chain: string) => void;
   // read function
   getTopListInfo: (onSuccess?: (receipt: any) => void) => Promise<void>;
   getPlayerAllAssets: (onSuccess?: (receipt: any) => void) => Promise<void>;

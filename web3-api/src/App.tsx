@@ -2,17 +2,18 @@ import {
   ConnectButton,
   useActiveWallet,
   useActiveWalletChain,
-  useConnectedWallets,
+  useSwitchActiveWalletChain,
 } from "thirdweb/react";
-import { client, GameContract, testnet } from "./client";
+import { bobTestnet, client, getGameContract, merlinTestnet } from "./client";
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import {
+  Chain,
   prepareContractCall,
   readContract,
   sendTransaction,
   waitForReceipt,
 } from "thirdweb";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 
 const wallets = [
@@ -24,8 +25,10 @@ const wallets = [
 export function App() {
   window.thirdwebClient = client;
 
+  const [currentChain, setCurrentChain] = useState<String | null>(null);
   const wallet = useActiveWallet();
   const chainId = useActiveWalletChain();
+  const switchChain = useSwitchActiveWalletChain();
 
   useEffect(() => {
     console.log("window.userAccount:", window.userAccount);
@@ -36,13 +39,20 @@ export function App() {
     }
   }, [wallet]);
 
-  useEffect(() => {
-    if (chainId?.id == testnet.id) {
-      window.isBaseSepoliaNetwork = true;
-    } else {
-      window.isBaseSepoliaNetwork = false;
-    }
-  }, [chainId]);
+ const selectNetwork = (chain: string) => {
+  window.currentChain = chain;
+  setCurrentChain(chain);
+  switch(chain) {
+    case "MerlinTestnet":
+      switchChain(merlinTestnet);
+      break;
+    case "BobTestnet":
+      switchChain(bobTestnet);
+      break;  
+  }
+ }
+
+ window.selectNetwork = selectNetwork;
 
   /// ###########################################
   /// wallet connect
@@ -52,6 +62,14 @@ export function App() {
     let button = document.getElementsByClassName("tw-connect-wallet")[0];
     if (button != null && button instanceof HTMLButtonElement) {
       button.click();
+      switch(window.currentChain) {
+        case "MerlinTestnet":
+          switchChain(merlinTestnet);
+          break;
+        case "BobTestnet":
+          switchChain(bobTestnet);
+          break;  
+      }
     }
   };
 
@@ -73,7 +91,7 @@ export function App() {
     onSuccess?: (receipt: any) => void
   ) => {
     const data = await readContract({
-      contract: GameContract,
+      contract: getGameContract(currentChain),
       method: "function getTopListInfo() view returns (uint256[10], uint256[10], address[10], uint256)", 
       params: [],
     });
@@ -86,7 +104,7 @@ export function App() {
     let account = wallet?.getAccount()?.address;
     if(account) {
       const data = await readContract({
-        contract: GameContract,
+        contract: getGameContract(currentChain),
         method: "function getPlayerAllAssets(address player) view returns (uint256 gold, uint256 diamond)", 
         params: [account],
       });
@@ -100,7 +118,7 @@ export function App() {
     let account = wallet?.getAccount()?.address;
     if(account) {
       const data = await readContract({
-        contract: GameContract,
+        contract: getGameContract(currentChain),
         method: "function getPlayerLastLotteryResult(address player) view returns (uint256 itemType, uint256 num)", 
         params: [account],
       });
@@ -114,7 +132,7 @@ export function App() {
     let account = wallet?.getAccount()?.address;
     if(account) {
       const data = await readContract({
-        contract: GameContract,
+        contract: getGameContract(currentChain),
         method: "function getPlayerAllWeaponInfo(address player) view returns (uint256[] weaponIdList, uint256[] weaponLevelList)", 
         params: [account],
       });
@@ -128,7 +146,7 @@ export function App() {
     let account = wallet?.getAccount()?.address;
     if(account) {
       const data = await readContract({
-        contract: GameContract,
+        contract: getGameContract(currentChain),
         method: "function getPlayerAllSkinInfo(address player) view returns (uint256[] skinIdList, uint256[] skinLevelList)", 
         params: [account],
       });
@@ -154,7 +172,7 @@ export function App() {
       let account = wallet?.getAccount();
       if (account) {
         const transaction = prepareContractCall({
-          contract: GameContract,
+          contract: getGameContract(currentChain),
           method: "function startGame() payable", 
           params: [],
           value: BigInt(10**11), // gas token amount for payable function
@@ -193,7 +211,7 @@ export function App() {
       let account = wallet?.getAccount();
       if (account) {
         const transaction = prepareContractCall({
-          contract: GameContract,
+          contract: getGameContract(currentChain),
           method: "function gameOver(uint256 time, uint256 kills)", 
           params: [time, kills] 
         });
@@ -230,7 +248,7 @@ export function App() {
       let account = wallet?.getAccount();
       if (account) {
         const transaction = prepareContractCall({
-          contract: GameContract,
+          contract: getGameContract(currentChain),
           method: "function buyOrUpgradeSkin(uint256 id)", 
           params: [id] 
         });
@@ -267,7 +285,7 @@ export function App() {
       let account = wallet?.getAccount();
       if (account) {
         const transaction = prepareContractCall({
-          contract: GameContract,
+          contract: getGameContract(currentChain),
           method: "function buyOrUpgradeWeapon(uint256 id)", 
           params: [id] 
         });
@@ -303,7 +321,7 @@ export function App() {
       let account = wallet?.getAccount();
       if (account) {
         const transaction = await prepareContractCall({
-          contract: GameContract,
+          contract: getGameContract(currentChain),
           method: "function requestLottery() payable", 
           params: [] ,
           value: BigInt(4*(10**11)), // gas token amount for payable function
@@ -340,7 +358,7 @@ export function App() {
       let account = wallet?.getAccount();
       if (account) {
         const transaction = await prepareContractCall({
-          contract: GameContract,
+          contract: getGameContract(currentChain),
           method: "function mintGold() payable", 
           params: [],
           value: BigInt(10**11), // gas token amount for payable function
@@ -377,7 +395,7 @@ export function App() {
       let account = wallet?.getAccount();
       if (account) {
         const transaction = await prepareContractCall({
-          contract: GameContract,
+          contract: getGameContract(currentChain),
           method: "function reLive() payable", 
           params: [],
           value: BigInt(5*(10**11)), // gas token amount for payable function
@@ -415,13 +433,14 @@ export function App() {
   window.reLive = reLive;
 
   // contract
-  window.storageContract = GameContract;
+  window.storageContract = getGameContract(currentChain);
 
   return (
     <main>
       <div style={{ display: "none" }}>
-        <ConnectButton client={client} wallets={wallets} chain={testnet} />
+        <ConnectButton client={client} wallets={wallets} />
       </div>
     </main>
   );
 }
+

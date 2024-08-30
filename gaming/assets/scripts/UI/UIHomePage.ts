@@ -289,6 +289,18 @@ export default class UIHomePage extends UIPage {
   }
 
   protected onOpen() {
+    let wallet_icon = cc.find("BtnWallet/icon", this._page);
+    switch(window.currentChain) {
+      case "MerlinTestnet":
+        wallet_icon.getComponent(cc.Sprite).spriteFrame =
+        cocosz.resMgr.getRes("merlin_logo", cc.SpriteFrame);
+        break;
+      case "BobTestnet":
+        wallet_icon.getComponent(cc.Sprite).spriteFrame =
+        cocosz.resMgr.getRes("bob_logo", cc.SpriteFrame);
+        break;
+    }
+
     this._updatePlayer();
     this._updateWeapon();
     this._updateWeaponFrame();
