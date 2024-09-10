@@ -5,6 +5,8 @@ import { AccountInfo, UserResponseStatus } from "@aptos-labs/wallet-standard";
 import { getAdapter } from "./misc/adapter";
 import { toast } from "sonner";
 import { networkMap } from "./misc/utils";
+import { getMovement } from "./misc/movement";
+import { GET_MESSAGE_FUNCTION, SET_MESSAGE_FUNCTION } from "./config";
 
 export function App() {
   const [userAccount, setUserAccount] = useState<AccountInfo>();
@@ -17,7 +19,7 @@ export function App() {
       const network = await adapter.network();
       window.isMovementNetwork = network.chainId === 27;
       setChainId(network.chainId);
-    }
+    };
     setIsMovement();
   }, [chainId]);
 
@@ -60,7 +62,7 @@ export function App() {
         }
       });
 
-      adapter.on('networkChange', (networkInfo) => {
+      adapter.on("networkChange", (networkInfo) => {
         window.isMovementNetwork = networkInfo.chainId === 27;
       });
     };
@@ -165,9 +167,88 @@ export function App() {
   window.onConnectedButtonClick = onDisconnect;
   window.switchNetwork = switchToMovementAptosTestnet;
 
+  /// ###########################################
+  /// read contract function
+  /// ###########################################
+
+  const getPlayerAllAssets = async (onSuccess?: (receipt: any) => void) => {
+    try {
+      const aptos = getMovement(27);
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const aptos = getMovement(27);
+        const newMessage = await aptos.view({
+          payload: {
+            function: GET_MESSAGE_FUNCTION,
+            functionArguments: [accountAddress],
+          },
+        });
+        console.log("Message:", newMessage);
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
+  window.getPlayerAllAssets = getPlayerAllAssets;
+
+  /// ###########################################
+  /// write contract function
+  /// ###########################################
+
+  const startGame = async (
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      const aptos = getMovement(27);
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const transaction = await aptos.transaction.build.simple({
+          sender: accountAddress,
+          data: {
+            function: SET_MESSAGE_FUNCTION,
+            functionArguments: [new Date().toString()],
+          },
+        });
+        const adapter = await getAdapter();
+        const committedTxn = await adapter.signAndSubmitTransaction(
+          transaction
+        );
+        console.log("signedTx:", committedTxn);
+        if (committedTxn.status !== UserResponseStatus.APPROVED) {
+          alert("Transaction rejected");
+          onError?.("Transaction rejected");
+        } else {
+          const args = committedTxn.args;
+          console.log(`Submitted transaction: ${args.hash}`);
+          const response = await aptos.waitForTransaction({ transactionHash: args.hash });
+          // console.log({ response })
+          if(response.success == true) {
+            onSuccess?.(response);
+          }
+        }
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
+  window.startGame = startGame;
 
   return (
     <main>
+      {/* <button onClick={() => startGame()}>startGame</button>
+      <br></br>
+      <button onClick={() => getPlayerAllAssets()}>getPlayerAllAssets</button> */}
       {/* <div style={{ display: "none" }}>
         <button
           onClick={async () => {
