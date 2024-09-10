@@ -14,6 +14,7 @@ export default class UILoadingPage extends UIPage {
   _BtnWallet: cc.Node;
   _BtnLogin: cc.Node;
   _BtnStartGame: cc.Node;
+  _BtnSwitch: cc.Node;
 
   private _wallet_icon: cc.Node = null;
   private _wallet_name: cc.Node = null;
@@ -27,7 +28,7 @@ export default class UILoadingPage extends UIPage {
    * 页面加载时调用，初始化健康警告和加载条
    */
   protected onLoad() {
-    let btnNames: string[] = ["BtnWallet", "BtnLogin", "BtnStartGame"];
+    let btnNames: string[] = ["BtnWallet", "BtnLogin", "BtnStartGame", "BtnSwitch"];
     btnNames.forEach((name) => {
       let btn: cc.Node = cc.find(name, this._page);
       if (btn) {
@@ -38,7 +39,10 @@ export default class UILoadingPage extends UIPage {
           this._BtnLogin = btn;
         } else if (btn.name == "BtnStartGame") {
           this._BtnStartGame = btn;
+        } else if (btn.name == "BtnSwitch") {
+          this._BtnSwitch = btn;
         }
+        
       }
     });
     this._initializeLoadingBar();
@@ -52,6 +56,7 @@ export default class UILoadingPage extends UIPage {
       this._LoadingBar = cc.find("LoadingBar", this._page);
       this._BtnWallet = cc.find("BtnWallet", this._page);
       this._BtnStartGame = cc.find("BtnStartGame", this._page);
+      this._BtnSwitch = cc.find("BtnSwitch", this._page);
 
       this._wallet_icon = cc.find("Background/icon", this._BtnWallet);
       this._wallet_name = cc.find("Background/name", this._BtnWallet);
@@ -70,17 +75,25 @@ export default class UILoadingPage extends UIPage {
               window.userAccount.slice(0, 6) +
               "..." +
               window.userAccount.slice(-4);
+            
             this._BtnLogin.active = false;
-            this._BtnWallet.active = true;
-            this._BtnStartGame.active = true;
-            // console.log('account:', account)
-            // console.log('this._wallet_name.getComponent(cc.Label).string:', this._wallet_name.getComponent(cc.Label).string)
+            if(window.isMovementNetwork) {
+              this._BtnWallet.active = true;
+              this._BtnStartGame.active = true;
+              this._BtnSwitch.active = false;
+            } else {
+              this._BtnWallet.active = false;
+              this._BtnStartGame.active = false;
+              this._BtnSwitch.active = true;
+            }
+
             if (this._wallet_name.getComponent(cc.Label).string !== account) {
               this._wallet_name.getComponent(cc.Label).string = account;
             }
           } else {
             this._BtnLogin.active = true;
             this._BtnWallet.active = false;
+            this._BtnSwitch.active = false;
             this._BtnStartGame.active = false;
           }
         }
@@ -114,6 +127,12 @@ export default class UILoadingPage extends UIPage {
       case "BtnStartGame": {
         cocosz.unscheduleAllCallbacks();
         cocosz.goToHome();
+        break;
+      }
+      case "BtnSwitch": {
+        if (window.switchNetwork != null) {
+          window.switchNetwork();
+        }
         break;
       }
     }

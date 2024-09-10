@@ -1,9 +1,11 @@
-interface Window {
+interface Window {  
   ethereum?: any;
   web3?: any;
   userAccount?: String;
   onConnectButtonClick: Function;
   onConnectedButtonClick: Function;
+  switchNetwork: Function;
+  isMovementNetwork: boolean;
   storageContract: Readonly<ContractOptions<[]>>;
   // read function
   getTopListInfo: (onSuccess?: (receipt: any) => void) => Promise<void>;

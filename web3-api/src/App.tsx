@@ -1,296 +1,197 @@
+import { useState, useEffect } from "react";
 
-import { getGameContract, initMetaMaskWeb3 } from "./client";
-import { createWallet, inAppWallet } from "thirdweb/wallets";
-import { useEffect, useState } from "react";
-import Web3 from "web3";
+import { Network } from "@aptos-labs/ts-sdk";
+import { AccountInfo, UserResponseStatus } from "@aptos-labs/wallet-standard";
+import { getAdapter } from "./misc/adapter";
+import { toast } from "sonner";
+import { networkMap } from "./misc/utils";
 
 export function App() {
-  const [account, setAccount] = useState<String | null>(null);
+  const [userAccount, setUserAccount] = useState<AccountInfo>();
+  const [currentNetwork, setCurrentNetwork] = useState<string>();
+  const [chainId, setChainId] = useState<number>();
 
   useEffect(() => {
-    console.log("window.userAccount:", window.userAccount);
-    if (account != null && account !== "") {
-      window.userAccount = account;
-    } else {
-      window.userAccount = undefined;
+    const setIsMovement = async () => {
+      const adapter = await getAdapter();
+      const network = await adapter.network();
+      window.isMovementNetwork = network.chainId === 27;
+      setChainId(network.chainId);
     }
-  }, [account]);
+    setIsMovement();
+  }, [chainId]);
+
+  useEffect(() => {
+    const init = async () => {
+      const adapter = await getAdapter();
+      if (await adapter.canEagerConnect()) {
+        try {
+          const response = await adapter.connect();
+          if (response.status === UserResponseStatus.APPROVED) {
+            setUserAccount(response.args);
+            window.userAccount = response.args.address.toString();
+            const network = await adapter.network();
+            setCurrentNetwork(network.chainId === 27 ? "Aptos" : "Movement");
+            setChainId(network.chainId);
+          }
+        } catch (error) {
+          await adapter.disconnect().catch(() => {});
+          console.log(error);
+        }
+      }
+      // Events
+      adapter.on("connect", (accInfo) => {
+        if (accInfo && "address" in accInfo) {
+          setUserAccount(accInfo);
+          window.userAccount = accInfo.address.toString();
+        }
+      });
+
+      adapter.on("disconnect", () => {
+        setUserAccount(undefined);
+        window.userAccount = undefined;
+        console.log("adapter disconnected");
+      });
+
+      adapter.on("accountChange", (accInfo) => {
+        if (accInfo && "address" in accInfo) {
+          setUserAccount(accInfo);
+          window.userAccount = accInfo.address.toString();
+        }
+      });
+
+      adapter.on('networkChange', (networkInfo) => {
+        window.isMovementNetwork = networkInfo.chainId === 27;
+      });
+    };
+    init();
+    // Try eagerly connect
+  }, []);
 
   /// ###########################################
   /// wallet connect
   /// ###########################################
 
-  const onConnectButtonClick = () => {
-    initMetaMaskWeb3((newAccount: String) => {
-      setAccount(newAccount);
-    });
-  };
-
-  const onConnectedButtonClick = () => {
-    // let button = document.getElementsByClassName("tw-connected-wallet")[0];
-    // if (button != null && button instanceof HTMLButtonElement) {
-    //   button.click();
-    // }
-  };
-
-  window.onConnectButtonClick = onConnectButtonClick;
-  window.onConnectedButtonClick = onConnectedButtonClick;
-
-  /// ###########################################
-  /// read contract function
-  /// ###########################################
-
-  const getTopListInfo = async (onSuccess?: (receipt: any) => void) => {
-    const gameContract = getGameContract();
-    if (gameContract) {
-      let data = await gameContract.methods.getTopListInfo().call();
-      onSuccess?.(data);
+  const onConnect = async () => {
+    const adapter = await getAdapter();
+    try {
+      const response = await adapter.connect(undefined, {
+        chainId: 27,
+        name: Network.CUSTOM,
+        url: "https://aptos.testnet.suzuka.movementlabs.xyz/v1",
+      });
+      if (response.status === UserResponseStatus.APPROVED) {
+        setUserAccount(response.args);
+        window.userAccount = response.args.address.toString();
+        const network = await adapter.network();
+        setCurrentNetwork(network.chainId === 27 ? "Aptos" : "Movement");
+        setChainId(network.chainId);
+        toast.success("Wallet connected!");
+      } else {
+        toast.error("User rejected connection");
+        return;
+      }
+    } catch (error) {
+      toast.error("Wallet connection failed!");
+      // If error, disconnect ignore error
+      await adapter.disconnect().catch(() => {});
+      return;
     }
-  };
-
-  const getPlayerAllAssets = async (onSuccess?: (receipt: any) => void) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      let data = await gameContract.methods.getPlayerAllAssets(account).call();
-      onSuccess?.(data);
-    }
-  };
-
-  const getPlayerLastLotteryResult = async (
-    onSuccess?: (receipt: any) => void
-  ) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      let data = await gameContract.methods
-        .getPlayerLastLotteryResult(account)
-        .call();
-      onSuccess?.(data);
-    }
-  };
-
-  const getPlayerAllWeaponInfo = async (onSuccess?: (receipt: any) => void) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      let data = await gameContract.methods
-        .getPlayerAllWeaponInfo(account)
-        .call();
-      onSuccess?.(data);
-    }
-  };
-
-  const getPlayerAllSkinInfo = async (onSuccess?: (receipt: any) => void) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      let data = await gameContract.methods
-        .getPlayerAllSkinInfo(account)
-        .call();
-      onSuccess?.(data);
-    }
-  };
-
-  window.getTopListInfo = getTopListInfo;
-  window.getPlayerAllAssets = getPlayerAllAssets;
-  window.getPlayerLastLotteryResult = getPlayerLastLotteryResult;
-  window.getPlayerAllWeaponInfo = getPlayerAllWeaponInfo;
-  window.getPlayerAllSkinInfo = getPlayerAllSkinInfo;
-
-  /// ###########################################
-  /// write contract function
-  /// ###########################################
-
-  const startGame = async (
-    onSuccess?: (receipt: any) => void,
-    onError?: (receipt: any) => void
-  ) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      await gameContract.methods
-        .startGame()
-        .send({
-          from: account,
-        })
-        .on("receipt", function (receipt: any) {
-          console.log(receipt);
-          onSuccess?.(receipt);
-        })
-        .on("error", function (error: any) {
-          console.log(error);
-          alert("start game failed！");
-          onError?.(error);
+    try {
+      // Check chainId
+      const chainId = await adapter.network();
+      if (chainId.chainId !== 27) {
+        // If chainId is different than 4 (movement devnet) change it
+        const changeNetworkResponse = await adapter.changeNetwork({
+          chainId: 27,
+          name: Network.CUSTOM,
+          url: "https://aptos.testnet.suzuka.movementlabs.xyz/v1",
         });
+        if (changeNetworkResponse.status === UserResponseStatus.APPROVED) {
+          setCurrentNetwork(chainId.chainId === 27 ? "Movement" : "Aptos");
+          setChainId(chainId.chainId);
+          toast.success("Network changed!");
+        } else {
+          toast.error("User rejected network change");
+          return;
+        }
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const gameOver = async (
-    time: bigint,
-    kills: bigint,
-    onSuccess?: (receipt: any) => void,
-    onError?: (receipt: any) => void
-  ) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      await gameContract.methods
-        .gameOver(time, kills)
-        .send({
-          from: account,
-        })
-        .on("receipt", function (receipt: any) {
-          console.log(receipt);
-          onSuccess?.(receipt);
-        })
-        .on("error", function (error: any) {
-          console.log(error);
-          alert("gameOver failed！");
-          onError?.(error);
-        });
+  const onDisconnect = async () => {
+    try {
+      console.log("start");
+      const adapter = await getAdapter();
+      console.log(adapter);
+      await adapter.disconnect();
+      console.log("done");
+      setUserAccount(undefined);
+      window.userAccount = undefined;
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const buyOrUpgradeSkin = async (
-    id: bigint,
-    onSuccess?: (receipt: any) => void,
-    onError?: (receipt: any) => void
-  ) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      await gameContract.methods
-        .buyOrUpgradeSkin(id)
-        .send({
-          from: account,
-        })
-        .on("receipt", function (receipt: any) {
-          console.log(receipt);
-          onSuccess?.(receipt);
-        })
-        .on("error", function (error: any) {
-          console.log(error);
-          alert("buyOrUpgradeSkin failed！");
-          onError?.(error);
-        });
+  const switchToMovementAptosTestnet = async () => {
+    try {
+      const adapter = await getAdapter();
+      const network = await adapter.network();
+
+      let changeNetworkResponse;
+      if (network.chainId !== 27) {
+        // Aptos network is active (mainnet, devnet or testnet)
+        changeNetworkResponse = await adapter.changeNetwork(networkMap[27]);
+      }
+
+      if (
+        changeNetworkResponse &&
+        changeNetworkResponse.status === UserResponseStatus.APPROVED
+      ) {
+        const changedNetwork = await adapter.network();
+        toast.success(`Changed network to ${currentNetwork}!`);
+        setCurrentNetwork(changedNetwork.chainId === 27 ? "Aptos" : "Movement");
+        setChainId(changedNetwork.chainId);
+      }
+    } catch (error) {
+      toast.error("Couldn't change network");
+      console.log(error);
     }
   };
 
-  const buyOrUpgradeWeapon = async (
-    id: bigint,
-    onSuccess?: (receipt: any) => void,
-    onError?: (receipt: any) => void
-  ) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      await gameContract.methods
-        .buyOrUpgradeWeapon(id)
-        .send({
-          from: account,
-        })
-        .on("receipt", function (receipt: any) {
-          console.log(receipt);
-          onSuccess?.(receipt);
-        })
-        .on("error", function (error: any) {
-          console.log(error);
-          alert("buyOrUpgradeWeapon failed！");
-          onError?.(error);
-        });
-    }
-  };
+  window.onConnectButtonClick = onConnect;
+  window.onConnectedButtonClick = onDisconnect;
+  window.switchNetwork = switchToMovementAptosTestnet;
 
-  const requestLottery = async (
-    onSuccess?: (receipt: any) => void,
-    onError?: (receipt: any) => void
-  ) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      await gameContract.methods
-        .requestLottery()
-        .send({
-          from: account,
-          value: 4*(10**15),
-        })
-        .on("receipt", function (receipt: any) {
-          console.log(receipt);
-          onSuccess?.(receipt);
-        })
-        .on("error", function (error: any) {
-          console.log(error);
-          alert("requestLottery failed！");
-          onError?.(error);
-        });
-    }
-  };
-
-  const mintGold = async (
-    onSuccess?: (receipt: any) => void,
-    onError?: (receipt: any) => void
-  ) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      await gameContract.methods
-        .mintGold()
-        .send({
-          from: account,
-          value: (10**15),
-        })
-        .on("receipt", function (receipt: any) {
-          console.log(receipt);
-          onSuccess?.(receipt);
-        })
-        .on("error", function (error: any) {
-          console.log(error);
-          alert("mintGold failed！");
-          onError?.(error);
-        });
-    }
-  };
-
-  const reLive = async (
-    onSuccess?: (receipt: any) => void,
-    onError?: (receipt: any) => void
-  ) => {
-    const gameContract = getGameContract();
-    if (account != null && gameContract) {
-      await gameContract.methods
-        .reLive()
-        .send({
-          from: account,
-          value: 5*(10**15),
-        })
-        .on("receipt", function (receipt: any) {
-          console.log(receipt);
-          onSuccess?.(receipt);
-        })
-        .on("error", function (error: any) {
-          console.log(error);
-          alert("reLive failed！");
-          onError?.(error);
-        });
-    }
-  };
-
-  window.startGame = startGame;
-  window.gameOver = gameOver;
-  window.buyOrUpgradeSkin = buyOrUpgradeSkin;
-  window.buyOrUpgradeWeapon = buyOrUpgradeWeapon;
-  window.requestLottery = requestLottery;
-  window.mintGold = mintGold;
-  window.reLive = reLive;
 
   return (
     <main>
-      {/* <button onClick={async () => {
-          const provider = new Web3.providers.HttpProvider("https://mevm.devnet.m1.movementlabs.xyz");
-          let web3 = new Web3(provider);
-          let chainId = await web3.eth.getChainId();
-          console.log("chainId: ",chainId )
-      }}>getTopListInfo</button> */}
-    
-      {/* <button onClick={() => onConnectButtonClick()}>init</button>
-      <br/>
-      <button onClick={() => getTopListInfo((resp: any) => console.log(resp))}>getTopListInfo</button>
-      <br/>
-      <button onClick={() => startGame()}>startGame</button> */}
-      <div style={{ display: "none" }}>
-        {/* <ConnectButton client={client} wallets={wallets} chain={move_evm} /> */}
-      </div>
+      {/* <div style={{ display: "none" }}>
+        <button
+          onClick={async () => {
+            if (userAccount?.address !== undefined) {
+              await onDisconnect();
+            } else {
+              await onConnect();
+            }
+          }}
+          className=" relative overflow-hidden bg-black text-white w-[180px] h-[50px] rounded-lg glow-effect hover:scale-110 transition-transform duration-250"
+        >
+          <span className="absolute inset-0 flex items-center justify-center z-10">
+            {userAccount?.address !== undefined
+              ? userAccount?.address.toString()?.substring(0, 10)
+              : "Connect"}
+          </span>
+          <div className="absolute inset-0 bg-black stars-bg animate-move-stars z-0"></div>
+        </button>
+        <button onClick={switchToMovementAptosTestnet}>
+          changeNetwork to {currentNetwork}
+        </button>
+        <br></br>
+        <button>chainId: {chainId}</button>
+      </div> */}
     </main>
   );
 }
