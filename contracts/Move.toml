@@ -1,5 +1,6 @@
 [package]
-name = "onchainVampireSurvivors-v1.0.0"
+# name = "onchainVampireSurvivors"
+name = "aetest8"
 version = "1.0.0"
 authors = []
 
