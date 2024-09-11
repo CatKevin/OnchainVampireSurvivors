@@ -6,7 +6,7 @@ import { getAdapter } from "./misc/adapter";
 import { toast } from "sonner";
 import { networkMap } from "./misc/utils";
 import { getMovement } from "./misc/movement";
-import { GET_MESSAGE_FUNCTION, GET_TOP_LIST_FUNCTION, SET_MESSAGE_FUNCTION } from "./config";
+import { GAME_OVER_FUNCTION, GET_LEADERBOARD_ITEM_LIST_FUNCTION, START_GAME_FUNCTION } from "./config";
 
 export function App() {
   const [userAccount, setUserAccount] = useState<AccountInfo>();
@@ -171,19 +171,19 @@ export function App() {
   /// read contract function
   /// ###########################################
 
-  const getTopList = async (onSuccess?: (receipt: any) => void) => {
+  const getTopListInfo = async (onSuccess?: (receipt: any) => void) => {
     try {
-      const aptos = getMovement(27);
       let accountAddress = userAccount?.address.toString();
+      console.log('accountAddress:', accountAddress)
       if (accountAddress) {
         const aptos = getMovement(27);
-        const newMessage = await aptos.view({
+        const data = await aptos.view({
           payload: {
-            function: GET_TOP_LIST_FUNCTION,
+            function: GET_LEADERBOARD_ITEM_LIST_FUNCTION,
             functionArguments: [],
           },
         });
-        console.log("Message:", newMessage);
+        onSuccess?.(data);
       }
     } catch (e: any) {
       console.log("e:", e);
@@ -196,17 +196,16 @@ export function App() {
 
   const getPlayerAllAssets = async (onSuccess?: (receipt: any) => void) => {
     try {
-      const aptos = getMovement(27);
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
         const aptos = getMovement(27);
-        const newMessage = await aptos.view({
+        const data = await aptos.view({
           payload: {
-            function: GET_MESSAGE_FUNCTION,
-            functionArguments: [accountAddress],
+            function: GET_LEADERBOARD_ITEM_LIST_FUNCTION,
+            functionArguments: [],
           },
         });
-        console.log("Message:", newMessage);
+        // onSuccess?.(data);
       }
     } catch (e: any) {
       console.log("e:", e);
@@ -217,6 +216,7 @@ export function App() {
     }
   };
 
+  window.getTopListInfo = getTopListInfo;
   window.getPlayerAllAssets = getPlayerAllAssets;
 
   /// ###########################################
@@ -234,8 +234,52 @@ export function App() {
         const transaction = await aptos.transaction.build.simple({
           sender: accountAddress,
           data: {
-            function: SET_MESSAGE_FUNCTION,
-            functionArguments: [new Date().toString()],
+            function: START_GAME_FUNCTION,
+            functionArguments: [],
+          },
+        });
+        const adapter = await getAdapter();
+        const committedTxn = await adapter.signAndSubmitTransaction(
+          transaction
+        );
+        console.log("signedTx:", committedTxn);
+        if (committedTxn.status !== UserResponseStatus.APPROVED) {
+          alert("Transaction rejected");
+          onError?.("Transaction rejected");
+        } else {
+          const args = committedTxn.args;
+          console.log(`Submitted transaction: ${args.hash}`);
+          const response = await aptos.waitForTransaction({ transactionHash: args.hash });
+          // console.log({ response })
+          if(response.success == true) {
+            onSuccess?.(response);
+          }
+        }
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
+  const gameOver = async (
+    time: bigint,
+    kills: bigint,
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      const aptos = getMovement(27);
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const transaction = await aptos.transaction.build.simple({
+          sender: accountAddress,
+          data: {
+            function: GAME_OVER_FUNCTION,
+            functionArguments: [time, kills],
           },
         });
         const adapter = await getAdapter();
@@ -266,10 +310,11 @@ export function App() {
   };
 
   window.startGame = startGame;
+  window.gameOver = gameOver;
 
   return (
     <main>
-      <button onClick={()=>getTopList()}>getTopList</button>
+      {/* <button onClick={()=>getTopListInfo()}>getTopListInfo</button> */}
       {/* <button onClick={() => startGame()}>startGame</button>
       <br></br>
       <button onClick={() => getPlayerAllAssets()}>getPlayerAllAssets</button> */}

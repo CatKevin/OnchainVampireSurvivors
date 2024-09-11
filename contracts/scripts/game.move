@@ -1,4 +1,4 @@
-module hello_blockchain::atopList11 {
+module hello_blockchain::onchainVampireSurvivors {
     use std::error;
     use std::signer;
     use std::vector;
@@ -9,7 +9,7 @@ module hello_blockchain::atopList11 {
     const ENO_PLAYER_LATEST_GAME_DATA: u64 = 2;
     const ENO_PLAYER_INVALID: u64 = 3;
 
-    const MAX_LEADERBOARD: u64 = 5;
+    const MAX_LEADERBOARD: u64 = 10;
 
     struct Leaderboard has key {
         leaderboard_list: vector<LeaderboardItem>,

@@ -58,20 +58,22 @@ export default class UIRankingsPanel extends UIPage {
       window.getTopListInfo((result) => {
         console.log("result:", result);
 
+        let leaderboardList = result[0];
+        let lastUpdateTime = result[1];
+
         let rankingsList = [];
-        let topGradeList = result[0];
-        let topTimeList= result[1];
-        let topPlayerList = result[2];
-        let lastUpdateTime = result[3];
-        for (let i = 0; i < 10; i++) {
-          let grade = parseInt(topGradeList[i]);
-          if (grade > 0) {
-            rankingsList.push({
-              time: parseInt(topTimeList[i]),
-              address: topPlayerList[i],
-              grade: grade,
-            });
-          }
+
+        for(let i =0; i<leaderboardList.length; i++) {
+            let item = leaderboardList[i];
+            let kills = parseInt(item.kills);
+            let duration = parseInt(item.duration);
+            if(kills >0) {
+              rankingsList.push({
+                time: duration,
+                address: item.sender,
+                grade: kills,
+              });
+            }
         }
 
         if (lastUpdateTime != null && lastUpdateTime != "") {
