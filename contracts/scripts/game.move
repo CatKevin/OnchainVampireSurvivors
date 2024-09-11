@@ -1,4 +1,4 @@
-module hello_blockchain::atopList3 {
+module hello_blockchain::atopList11 {
     use std::error;
     use std::signer;
     use std::vector;
@@ -6,11 +6,14 @@ module hello_blockchain::atopList3 {
     use aptos_framework::timestamp;
 
     const ENOT_OWNER: u64 = 1;
+    const ENO_PLAYER_LATEST_GAME_DATA: u64 = 2;
+    const ENO_PLAYER_INVALID: u64 = 3;
 
     const MAX_LEADERBOARD: u64 = 5;
 
     struct Leaderboard has key {
         leaderboard_list: vector<LeaderboardItem>,
+        total_game_time: u64,
         last_one_index: u64,
         update_time: u64
     }
@@ -22,37 +25,99 @@ module hello_blockchain::atopList3 {
         create_time: u64
     }
 
-    #[event]
-    struct AddedLeaderboardItem has drop, store {
-        sender: address,
+    struct PlayerLatestGameData has key {
+        player: address,
+        start_time: u64,
+        end_time: u64,
         duration: u64,
-        kills: u64,
-        create_time: u64
+        kills: u64
+    }
+
+    #[event]
+    struct GameStartLog has drop, store {
+        player: address,
+        start_time: u64,
+        total_game_time: u64
+    }
+
+    #[event]
+    struct GameOverLog has drop, store {
+        player: address,
+        start_time: u64,
+        end_time: u64,
+        duration: u64,
+        kills: u64
     }
 
     fun init_module(owner: &signer) {
-        move_to(owner, Leaderboard { leaderboard_list: vector[], last_one_index: 0, update_time: timestamp::now_seconds() })
+        move_to(owner, Leaderboard { leaderboard_list: vector[], last_one_index: 0, total_game_time: 0, update_time: timestamp::now_seconds() })
     }
 
-    public entry fun add_leaderboard_item(sender: &signer, duration: u64, kills: u64) acquires Leaderboard {
-        // TODO: add zk proof
 
-        let leaderboard_item = LeaderboardItem {
-            sender: signer::address_of(sender),
-            duration,
-            kills,
-            create_time: timestamp::now_seconds()
-        };
-
-        event::emit(AddedLeaderboardItem {
-            sender: leaderboard_item.sender,
-            duration: leaderboard_item.duration,
-            kills: leaderboard_item.kills,
-            create_time: leaderboard_item.create_time
-        });
-
+    public entry fun startGame(account: signer) acquires Leaderboard,PlayerLatestGameData {
         let leaderboard = borrow_global_mut<Leaderboard>(@hello_blockchain);
 
+        let account_addr = signer::address_of(&account);
+        let start_time = timestamp::now_seconds();
+        // the first check prevents overwriting or miss-managing resources
+        if (!exists<PlayerLatestGameData>(account_addr)) {
+            move_to(&account, PlayerLatestGameData {
+                player: account_addr,
+                start_time: start_time,
+                end_time: start_time,
+                duration: 0,
+                kills: 0
+            })
+        } else {
+            let old_data = borrow_global_mut<PlayerLatestGameData>(account_addr);
+            old_data.player = account_addr;
+            old_data.start_time = start_time;
+            old_data.end_time = start_time;
+            old_data.duration = 0;
+            old_data.kills = 0;
+        };
+
+        event::emit(GameStartLog {
+            player: account_addr,
+            start_time: start_time,
+            total_game_time: leaderboard.total_game_time
+        });
+
+        leaderboard.total_game_time = leaderboard.total_game_time + 1;
+    }
+
+    public entry fun gameOver(sender: signer, duration: u64, kills: u64) acquires Leaderboard,PlayerLatestGameData {
+        let account_addr = signer::address_of(&sender);
+        let now = timestamp::now_seconds();
+        assert!(exists<PlayerLatestGameData>(account_addr), error::not_found(ENO_PLAYER_LATEST_GAME_DATA));
+
+        // TODO: add zk proof
+        
+        // save player data
+        let old_data = borrow_global_mut<PlayerLatestGameData>(account_addr);
+        let player = old_data.player;
+        assert!(player == account_addr, error::not_found(ENO_PLAYER_INVALID));
+        old_data.end_time = now;
+        old_data.duration = duration;
+        old_data.kills = kills;
+
+        // the event for serach player data
+        event::emit(GameOverLog {
+            player: old_data.player,
+            start_time: old_data.start_time,
+            end_time: now,
+            duration: duration,
+            kills: kills
+        });
+
+        // push to Leaderboard
+        let leaderboard = borrow_global_mut<Leaderboard>(@hello_blockchain);
+        let leaderboard_item = LeaderboardItem {
+            sender: account_addr,
+            duration,
+            kills,
+            create_time: now
+        };
         if (vector::length(&leaderboard.leaderboard_list) < MAX_LEADERBOARD) {
             vector::push_back(&mut leaderboard.leaderboard_list, leaderboard_item);
             let min_index = find_min_kills_index(&leaderboard.leaderboard_list);
@@ -66,6 +131,13 @@ module hello_blockchain::atopList3 {
         // update last_one_index
         let min_index = find_min_kills_index(&leaderboard.leaderboard_list);
         leaderboard.last_one_index = min_index;
+    }
+
+    public entry fun lottery() acquires Leaderboard {
+        let leaderboard = borrow_global_mut<Leaderboard>(@hello_blockchain);
+        // The aptos_framework::randomness feature is unavailable on the mainnet
+        let random = aptos_framework::timestamp::now_microseconds() % 100;
+        leaderboard.update_time = random;
     }
 
     public entry fun clear_leaderboard(owner: &signer) acquires Leaderboard {
