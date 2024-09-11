@@ -216,8 +216,54 @@ export function App() {
     }
   };
 
+  const getPlayerAllWeaponInfo = async (onSuccess?: (receipt: any) => void) => {
+    try {
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const aptos = getMovement(27);
+        const data = await aptos.view({
+          payload: {
+            function: GET_LEADERBOARD_ITEM_LIST_FUNCTION,
+            functionArguments: [],
+          },
+        });
+        onSuccess?.(data);
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
+  const getPlayerAllSkinInfo = async (onSuccess?: (receipt: any) => void) => {
+    try {
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const aptos = getMovement(27);
+        const data = await aptos.view({
+          payload: {
+            function: GET_LEADERBOARD_ITEM_LIST_FUNCTION,
+            functionArguments: [],
+          },
+        });
+        onSuccess?.(data);
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
   window.getTopListInfo = getTopListInfo;
   window.getPlayerAllAssets = getPlayerAllAssets;
+  window.getPlayerAllWeaponInfo = getPlayerAllWeaponInfo;
+  window.getPlayerAllSkinInfo = getPlayerAllSkinInfo;
 
   /// ###########################################
   /// write contract function

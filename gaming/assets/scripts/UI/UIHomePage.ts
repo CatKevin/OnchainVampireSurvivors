@@ -527,16 +527,16 @@ export default class UIHomePage extends UIPage {
       case "BtnWeapon": {
         window.getPlayerAllWeaponInfo((result) => {
           console.log(result)
-          let weaponIdList = result[0];
-          let weaponLevelList = result[1];
-          for (let i = 0; i < weaponIdList.length; i++) {
-            let weaponId = weaponIdList[i];
-            let weaponLevel = weaponLevelList[i];
-            let showWeaponInfo = cocosz.dataMgr.getGunInfo(weaponId);
-            showWeaponInfo.State = 1;
-            showWeaponInfo.Level = parseInt(weaponLevel);
-            cocosz.dataMgr.setGunInfo(showWeaponInfo.Id, showWeaponInfo);
-          }
+          // let weaponIdList = result[0];
+          // let weaponLevelList = result[1];
+          // for (let i = 0; i < weaponIdList.length; i++) {
+          //   let weaponId = weaponIdList[i];
+          //   let weaponLevel = weaponLevelList[i];
+          //   let showWeaponInfo = cocosz.dataMgr.getGunInfo(weaponId);
+          //   showWeaponInfo.State = 1;
+          //   showWeaponInfo.Level = parseInt(weaponLevel);
+          //   cocosz.dataMgr.setGunInfo(showWeaponInfo.Id, showWeaponInfo);
+          // }
           homeNode.active = false;
           weaponNode.active = true;
           skinNode.active = false;
@@ -548,16 +548,16 @@ export default class UIHomePage extends UIPage {
           homeNode.active = false;
           weaponNode.active = false;
           skinNode.active = true;
-          let skinIdList = result[0];
-          let skinLevelList = result[1];
-          for (let i = 0; i < skinIdList.length; i++) {
-            let skinId = skinIdList[i];
-            let skinLevel = skinLevelList[i];
-            let skinInfo = cocosz.dataMgr.getSkinInfo(skinId);
-            skinInfo.State = 1;
-            skinInfo.Level = parseInt(skinLevel);
-            cocosz.dataMgr.setSkinInfo(skinInfo.Id, skinInfo);
-          }
+          // let skinIdList = result[0];
+          // let skinLevelList = result[1];
+          // for (let i = 0; i < skinIdList.length; i++) {
+          //   let skinId = skinIdList[i];
+          //   let skinLevel = skinLevelList[i];
+          //   let skinInfo = cocosz.dataMgr.getSkinInfo(skinId);
+          //   skinInfo.State = 1;
+          //   skinInfo.Level = parseInt(skinLevel);
+          //   cocosz.dataMgr.setSkinInfo(skinInfo.Id, skinInfo);
+          // }
         });
         break;
       }
