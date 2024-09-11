@@ -6,7 +6,7 @@ import { getAdapter } from "./misc/adapter";
 import { toast } from "sonner";
 import { networkMap } from "./misc/utils";
 import { getMovement } from "./misc/movement";
-import { GET_MESSAGE_FUNCTION, SET_MESSAGE_FUNCTION } from "./config";
+import { GET_MESSAGE_FUNCTION, GET_TOP_LIST_FUNCTION, SET_MESSAGE_FUNCTION } from "./config";
 
 export function App() {
   const [userAccount, setUserAccount] = useState<AccountInfo>();
@@ -171,6 +171,29 @@ export function App() {
   /// read contract function
   /// ###########################################
 
+  const getTopList = async (onSuccess?: (receipt: any) => void) => {
+    try {
+      const aptos = getMovement(27);
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const aptos = getMovement(27);
+        const newMessage = await aptos.view({
+          payload: {
+            function: GET_TOP_LIST_FUNCTION,
+            functionArguments: [],
+          },
+        });
+        console.log("Message:", newMessage);
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
   const getPlayerAllAssets = async (onSuccess?: (receipt: any) => void) => {
     try {
       const aptos = getMovement(27);
@@ -246,6 +269,7 @@ export function App() {
 
   return (
     <main>
+      <button onClick={()=>getTopList()}>getTopList</button>
       {/* <button onClick={() => startGame()}>startGame</button>
       <br></br>
       <button onClick={() => getPlayerAllAssets()}>getPlayerAllAssets</button> */}

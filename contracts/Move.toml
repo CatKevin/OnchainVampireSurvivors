@@ -1,9 +1,11 @@
 [package]
-name = "onchainVampireSurvivors"
+# name = "onchainVampireSurvivors"
+name = "atest2"
 version = "1.0.0"
 authors = []
 
 [addresses]
+hello_blockchain = "0x5da29a405371ee7c13caef1b53008c39a8b7692b5d0eed5ed36707360ed9cddc"
 
 [dev-addresses]
 
