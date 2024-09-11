@@ -1,4 +1,4 @@
-module hello_blockchain::atopList2 {
+module hello_blockchain::atopList3 {
     use std::error;
     use std::signer;
     use std::vector;
@@ -79,7 +79,7 @@ module hello_blockchain::atopList2 {
     }
 
     #[view]
-    public fun get_leaderboard_item_list(): vector<LeaderboardItem> acquires Leaderboard {
+    public fun get_leaderboard_item_list(): (vector<LeaderboardItem>, u64) acquires Leaderboard {
         let leaderboard = borrow_global<Leaderboard>(@hello_blockchain);
 
         let leaderboard_list = vector[];
@@ -87,7 +87,7 @@ module hello_blockchain::atopList2 {
 
         vector::rotate(&mut leaderboard_list, leaderboard.last_one_index);
 
-        leaderboard_list
+        (leaderboard_list, leaderboard.update_time)
     }
 
     #[view]
