@@ -6,7 +6,7 @@ import { getAdapter } from "./misc/adapter";
 import { toast } from "sonner";
 import { networkMap } from "./misc/utils";
 import { getMovement } from "./misc/movement";
-import { GAME_OVER_FUNCTION, GET_LEADERBOARD_ITEM_LIST_FUNCTION, START_GAME_FUNCTION } from "./config";
+import { BUY_OR_UPGRADE_CHARACTER_FUNCTION, BUY_OR_UPGRADE_WEAPON_FUNCTION, GAME_OVER_FUNCTION, GET_PLAYER_ALL_ASSETS_FUNCTION, GET_PLAYER_ALL_CHARACTERS_INFO_FUNCTION, GET_PLAYER_ALL_WEAPONS_INFO_FUNCTION, GET_PLAYER_LAST_LOTTERY_RESULT_FUNCTION, GET_TOP_LIST_INFO_FUNCTION, MINT_GOLD_FUNCTION, REQUEST_LOTTERY_FUNCTION, START_GAME_FUNCTION } from "./config";
 
 export function App() {
   const [userAccount, setUserAccount] = useState<AccountInfo>();
@@ -179,10 +179,11 @@ export function App() {
         const aptos = getMovement(27);
         const data = await aptos.view({
           payload: {
-            function: GET_LEADERBOARD_ITEM_LIST_FUNCTION,
+            function: GET_TOP_LIST_INFO_FUNCTION,
             functionArguments: [],
           },
         });
+        console.log(data);
         onSuccess?.(data);
       }
     } catch (e: any) {
@@ -201,11 +202,12 @@ export function App() {
         const aptos = getMovement(27);
         const data = await aptos.view({
           payload: {
-            function: GET_LEADERBOARD_ITEM_LIST_FUNCTION,
-            functionArguments: [],
+            function: GET_PLAYER_ALL_ASSETS_FUNCTION,
+            functionArguments: [accountAddress],
           },
         });
-        // onSuccess?.(data);
+        console.log(data);
+        onSuccess?.(data);
       }
     } catch (e: any) {
       console.log("e:", e);
@@ -223,10 +225,11 @@ export function App() {
         const aptos = getMovement(27);
         const data = await aptos.view({
           payload: {
-            function: GET_LEADERBOARD_ITEM_LIST_FUNCTION,
-            functionArguments: [],
+            function: GET_PLAYER_ALL_WEAPONS_INFO_FUNCTION,
+            functionArguments: [accountAddress],
           },
         });
+        console.log(data);
         onSuccess?.(data);
       }
     } catch (e: any) {
@@ -245,10 +248,34 @@ export function App() {
         const aptos = getMovement(27);
         const data = await aptos.view({
           payload: {
-            function: GET_LEADERBOARD_ITEM_LIST_FUNCTION,
-            functionArguments: [],
+            function: GET_PLAYER_ALL_CHARACTERS_INFO_FUNCTION,
+            functionArguments: [accountAddress],
           },
         });
+        console.log(data);
+        onSuccess?.(data);
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
+  const getPlayerLastLotteryResult = async (onSuccess?: (receipt: any) => void) => {
+    try {
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const aptos = getMovement(27);
+        const data = await aptos.view({
+          payload: {
+            function: GET_PLAYER_LAST_LOTTERY_RESULT_FUNCTION,
+            functionArguments: [accountAddress],
+          },
+        });
+        console.log(data);
         onSuccess?.(data);
       }
     } catch (e: any) {
@@ -264,6 +291,7 @@ export function App() {
   window.getPlayerAllAssets = getPlayerAllAssets;
   window.getPlayerAllWeaponInfo = getPlayerAllWeaponInfo;
   window.getPlayerAllSkinInfo = getPlayerAllSkinInfo;
+  window.getPlayerLastLotteryResult = getPlayerLastLotteryResult;
 
   /// ###########################################
   /// write contract function
@@ -355,8 +383,198 @@ export function App() {
     }
   };
 
+  const buyOrUpgradeSkin = async (
+    id: bigint,
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      const aptos = getMovement(27);
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const transaction = await aptos.transaction.build.simple({
+          sender: accountAddress,
+          data: {
+            function: BUY_OR_UPGRADE_CHARACTER_FUNCTION,
+            functionArguments: [id],
+          },
+        });
+        const adapter = await getAdapter();
+        const committedTxn = await adapter.signAndSubmitTransaction(
+          transaction
+        );
+        console.log("signedTx:", committedTxn);
+        if (committedTxn.status !== UserResponseStatus.APPROVED) {
+          alert("Transaction rejected");
+          onError?.("Transaction rejected");
+        } else {
+          const args = committedTxn.args;
+          console.log(`Submitted transaction: ${args.hash}`);
+          const response = await aptos.waitForTransaction({ transactionHash: args.hash });
+          // console.log({ response })
+          if(response.success == true) {
+            onSuccess?.(response);
+          }
+        }
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
+  const buyOrUpgradeWeapon = async (
+    id: bigint,
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      const aptos = getMovement(27);
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const transaction = await aptos.transaction.build.simple({
+          sender: accountAddress,
+          data: {
+            function: BUY_OR_UPGRADE_WEAPON_FUNCTION,
+            functionArguments: [id],
+          },
+        });
+        const adapter = await getAdapter();
+        const committedTxn = await adapter.signAndSubmitTransaction(
+          transaction
+        );
+        console.log("signedTx:", committedTxn);
+        if (committedTxn.status !== UserResponseStatus.APPROVED) {
+          alert("Transaction rejected");
+          onError?.("Transaction rejected");
+        } else {
+          const args = committedTxn.args;
+          console.log(`Submitted transaction: ${args.hash}`);
+          const response = await aptos.waitForTransaction({ transactionHash: args.hash });
+          // console.log({ response })
+          if(response.success == true) {
+            onSuccess?.(response);
+          }
+        }
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
+  const requestLottery = async (
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      const aptos = getMovement(27);
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const transaction = await aptos.transaction.build.simple({
+          sender: accountAddress,
+          data: {
+            function: REQUEST_LOTTERY_FUNCTION,
+            functionArguments: [],
+          },
+        });
+        const adapter = await getAdapter();
+        const committedTxn = await adapter.signAndSubmitTransaction(
+          transaction
+        );
+        console.log("signedTx:", committedTxn);
+        if (committedTxn.status !== UserResponseStatus.APPROVED) {
+          alert("Transaction rejected");
+          onError?.("Transaction rejected");
+        } else {
+          const args = committedTxn.args;
+          console.log(`Submitted transaction: ${args.hash}`);
+          const response = await aptos.waitForTransaction({ transactionHash: args.hash });
+          // console.log({ response })
+          if(response.success == true) {
+            onSuccess?.(response);
+          }
+        }
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
+  const mintGold = async (
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      const aptos = getMovement(27);
+      let accountAddress = userAccount?.address.toString();
+      if (accountAddress) {
+        const transaction = await aptos.transaction.build.simple({
+          sender: accountAddress,
+          data: {
+            function: MINT_GOLD_FUNCTION,
+            functionArguments: [],
+          },
+        });
+        const adapter = await getAdapter();
+        const committedTxn = await adapter.signAndSubmitTransaction(
+          transaction
+        );
+        console.log("signedTx:", committedTxn);
+        if (committedTxn.status !== UserResponseStatus.APPROVED) {
+          alert("Transaction rejected");
+          onError?.("Transaction rejected");
+        } else {
+          const args = committedTxn.args;
+          console.log(`Submitted transaction: ${args.hash}`);
+          const response = await aptos.waitForTransaction({ transactionHash: args.hash });
+          // console.log({ response })
+          if(response.success == true) {
+            onSuccess?.(response);
+          }
+        }
+      }
+    } catch (e: any) {
+      console.log("e:", e);
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
+  const reLive = async (
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      alert('The current function is not open yet!!');
+      onError?.("");
+    } catch(e: any) {
+      let message = e["message"];
+      if(message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
+
   window.startGame = startGame;
   window.gameOver = gameOver;
+  window.buyOrUpgradeSkin = buyOrUpgradeSkin;
+  window.buyOrUpgradeWeapon = buyOrUpgradeWeapon;
+  window.requestLottery = requestLottery;
+  window.mintGold = mintGold;
+  window.reLive = reLive;
 
   return (
     <main>

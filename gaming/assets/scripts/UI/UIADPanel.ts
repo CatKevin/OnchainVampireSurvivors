@@ -48,7 +48,7 @@ export default class NewClass extends cc.Component {
   watchAD() {
     if (this.isDiamond) {
       window.mintGold(()=>{
-        let num = 500;
+        let num = 400;
         cocosz.dataMgr.DiamondCount += num;
         Msg.Show(i18n.t("msg.gxhdzs") + num);
       },()=>{
@@ -57,7 +57,7 @@ export default class NewClass extends cc.Component {
       
     } else {
       window.mintGold(()=>{
-        let num = 500;
+        let num = 400;
         cocosz.dataMgr.DiamondCount += num;
         Msg.Show(i18n.t("msg.gxhdzs") + num);
       },()=>{

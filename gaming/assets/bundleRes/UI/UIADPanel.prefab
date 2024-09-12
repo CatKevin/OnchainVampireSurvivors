@@ -429,8 +429,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "You don't have enough coins. Please pay 0.001 $MOV to exchange for 500 coins.",
-    "_N$string": "You don't have enough coins. Please pay 0.001 $MOV to exchange for 500 coins.",
+    "_string": "You don't have enough coins. Click here to get 400 $GLOD for free!!",
+    "_N$string": "You don't have enough coins. Click here to get 400 $GLOD for free!!",
     "_fontSize": 70,
     "_lineHeight": 90,
     "_enableWrapText": true,
@@ -860,7 +860,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 251.32,
+      "width": 387.04,
       "height": 167.2
     },
     "_anchorPoint": {
@@ -912,8 +912,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "PAY",
-    "_N$string": "PAY",
+    "_string": "CLAIM",
+    "_N$string": "CLAIM",
     "_fontSize": 120,
     "_lineHeight": 120,
     "_enableWrapText": true,
