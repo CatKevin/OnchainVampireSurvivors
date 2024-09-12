@@ -1,4 +1,4 @@
-module hello_blockchain::aeTopList13 {
+module hello_blockchain::adTopList2 {
     use std::error;
     use std::signer;
     use std::vector;
@@ -43,7 +43,8 @@ module hello_blockchain::aeTopList13 {
         weapons: vector<u64>,
         characters: vector<u64>,
         weaponLevelMap: SimpleMap<u64, u64>,
-        characterLevelMap: SimpleMap<u64, u64>
+        characterLevelMap: SimpleMap<u64, u64>,
+        latestLotteryItem: LotteryItem
     }
 
     struct GlobalConfig has key {
@@ -51,7 +52,8 @@ module hello_blockchain::aeTopList13 {
         characterPriceMap: SimpleMap<u64, GamePriceItem>,
         weaponLevelPriceList: vector<u64>,
         characterLevelPriceList: vector<u64>,
-        lotteryItemList: vector<LotteryItem>
+        lotteryItemList: vector<LotteryItem>,
+        totalLotteryTimes: u64
     }
 
     // 0: Gold; 1: Diamond;
@@ -61,7 +63,7 @@ module hello_blockchain::aeTopList13 {
     }
 
     // 0: Gold; 1: Diamond; 2: skin; 3: Weapon
-    struct LotteryItem has store {
+    struct LotteryItem has store, copy, drop {
         itemType: u8,
         num: u64
     }
@@ -76,6 +78,15 @@ module hello_blockchain::aeTopList13 {
     #[event]
     struct TestLog has drop, store {
         content_key: bool
+    }
+
+    
+    #[event]
+    struct RequestLottery has drop, store {
+        player: address,
+        total_lottery_times: u64,
+        random: u64,
+        lotteryItem: LotteryItem
     }
         
     fun init_module(owner: &signer) acquires GlobalConfig {
@@ -96,7 +107,8 @@ module hello_blockchain::aeTopList13 {
             characterPriceMap: simple_map::create(),
             weaponLevelPriceList: vector[],
             characterLevelPriceList: vector[],
-            lotteryItemList: vector[]
+            lotteryItemList: vector[],
+            totalLotteryTimes: 0
         });
         // set data
        let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
@@ -148,14 +160,13 @@ module hello_blockchain::aeTopList13 {
         // the first check prevents overwriting or miss-managing resources
         if (!exists<PlayerAsset>(account_addr)) {
             move_to(&account, PlayerAsset {
-                gold: 999999, // TODO: test
-                diamond: 9999999, // TODO: test
-                // gold: 0,
-                // diamond: 0,
+                gold: 0,
+                diamond: 0,
                 weapons: vector[],
                 characters: vector[],
                 weaponLevelMap: simple_map::create(),
-                characterLevelMap: simple_map::create()
+                characterLevelMap: simple_map::create(),
+                latestLotteryItem: LotteryItem { itemType: 0, num: 0 }
             })
         };
         let player_asset = borrow_global_mut<PlayerAsset>(account_addr);
@@ -230,14 +241,13 @@ module hello_blockchain::aeTopList13 {
         // the first check prevents overwriting or miss-managing resources
         if (!exists<PlayerAsset>(account_addr)) {
             move_to(&account, PlayerAsset {
-                gold: 999999, // TODO: test
-                diamond: 9999999, // TODO: test
-                // gold: 0,
-                // diamond: 0,
+                gold: 0,
+                diamond: 0,
                 weapons: vector[],
                 characters: vector[],
                 weaponLevelMap: simple_map::create(),
-                characterLevelMap: simple_map::create()
+                characterLevelMap: simple_map::create(),
+                latestLotteryItem: LotteryItem { itemType: 0, num: 0 }
             })
         };
         let player_asset = borrow_global_mut<PlayerAsset>(account_addr);
@@ -307,6 +317,70 @@ module hello_blockchain::aeTopList13 {
         }
     }
 
+    public entry fun requestLottery(account: signer) acquires GlobalConfig, PlayerAsset {
+        let account_addr = signer::address_of(&account);
+        // the first check prevents overwriting or miss-managing resources
+        if (!exists<PlayerAsset>(account_addr)) {
+            move_to(&account, PlayerAsset {
+                gold: 0,
+                diamond: 0,
+                weapons: vector[],
+                characters: vector[],
+                weaponLevelMap: simple_map::create(),
+                characterLevelMap: simple_map::create(),
+                latestLotteryItem: LotteryItem { itemType: 0, num: 0 }
+            })
+        };
+
+        let player_asset = borrow_global_mut<PlayerAsset>(account_addr);
+        let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
+        let totalLotteryTimes = globalConfig.totalLotteryTimes;
+        let lotteryItemList = &globalConfig.lotteryItemList;
+        let length = vector::length(lotteryItemList);
+        let random = aptos_framework::timestamp::now_microseconds() + totalLotteryTimes;
+        let randomIndex = random % length;
+        let lotteryItem: LotteryItem = *vector::borrow(lotteryItemList, randomIndex);
+
+        player_asset.latestLotteryItem = lotteryItem;
+
+        // distribution rewards
+        if(lotteryItem.itemType == 0) {
+            // mint gold
+            player_asset.gold = player_asset.gold + lotteryItem.num;
+        } else if(lotteryItem.itemType == 1) {
+            // mint diamond
+            player_asset.diamond = player_asset.diamond + lotteryItem.num;
+        } else if(lotteryItem.itemType == 2) {
+            // TODO: mint skin
+        } else if(lotteryItem.itemType == 3) {
+            // mint weapon
+            if(!vector::contains(&mut player_asset.weapons, &lotteryItem.num)) {
+                let weaponLevelMap = player_asset.weaponLevelMap;
+                vector::push_back(&mut player_asset.weapons, lotteryItem.num);
+                simple_map::add(&mut weaponLevelMap, lotteryItem.num , 0); 
+                player_asset.weaponLevelMap = weaponLevelMap;
+            } else {
+                // if player has this weapon, mint diamond
+                player_asset.diamond = player_asset.diamond + 100;
+            }
+        };
+
+        event::emit(RequestLottery {
+            player: account_addr,
+            total_lottery_times: totalLotteryTimes,
+            random: random,
+            lotteryItem: lotteryItem
+        });
+
+        globalConfig.totalLotteryTimes = totalLotteryTimes + 1;
+    }
+
+    #[view]
+    public fun getPlayerLastLotteryResult(player: address): (u8, u64) acquires PlayerAsset {
+        let player_asset = borrow_global<PlayerAsset>(player);
+        let latestLotteryItem: LotteryItem = player_asset.latestLotteryItem;
+        (latestLotteryItem.itemType, latestLotteryItem.num)
+    }
 
     inline fun only_owner(owner: &signer) {
         assert!(signer::address_of(owner) == @hello_blockchain, error::permission_denied(ENOT_OWNER));
