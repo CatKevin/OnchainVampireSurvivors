@@ -1,4 +1,4 @@
-module hello_blockchain::aeTopList8 {
+module hello_blockchain::aeTopList13 {
     use std::error;
     use std::signer;
     use std::vector;
@@ -173,19 +173,23 @@ module hello_blockchain::aeTopList8 {
             };
             i = i + 1;
         };
+        if(!found) {
+            if(id == 0) {
+                vector::push_back(&mut player_asset.weapons, id);
+            }
+        };
 
         let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
+        let weaponLevelMap = player_asset.weaponLevelMap;
         if(found || id == 0) {
             // upgrade
-            let weaponLevelMap = player_asset.weaponLevelMap;
             if(!simple_map::contains_key(&mut weaponLevelMap,&id)) {
                 simple_map::add(&mut weaponLevelMap, id , 0); 
             };
             let currentLevel = simple_map::borrow_mut(&mut weaponLevelMap, &id);
-            // assert!(currentLevel > 4, error::not_found(ENO_IS_REACHED_THE_HEIGHT_LEVEL)); // TODO:test
+
             assert!(*currentLevel < 4, error::not_found(ENO_IS_REACHED_THE_HEIGHT_LEVEL));
 
-            
             let weaponLevelPriceList = globalConfig.weaponLevelPriceList;
             let goldPrice: u64 = *vector::borrow(&weaponLevelPriceList, *currentLevel+1);
             let gold = player_asset.gold;
@@ -208,44 +212,101 @@ module hello_blockchain::aeTopList8 {
                 assert!(gold >= priceItem.price, error::not_found(ENO_NOT_ENOUGH_GOLD));
                 player_asset.gold = player_asset.gold - priceItem.price;
                 vector::push_back(&mut player_asset.weapons, id);
+                simple_map::add(&mut weaponLevelMap, id , 0); 
+                player_asset.weaponLevelMap = weaponLevelMap;
             } else if(priceItem.priceType == 1) {
                 let diamond = player_asset.diamond;
                 assert!(diamond >= priceItem.price, error::not_found(ENO_NOT_ENOUGH_DIAMOND));
                 player_asset.diamond = player_asset.diamond - priceItem.price;
                 vector::push_back(&mut player_asset.weapons, id);
+                simple_map::add(&mut weaponLevelMap, id , 0);
+                player_asset.weaponLevelMap = weaponLevelMap;
             };
         }
-
-
-
-        // let from_message = old_message_holder.message;
-        // old_message_holder.message = message;
-
-        // if(found || id == 0) {
-        //     // upgrade
-        //     uint currentLevel = playerWeaponLevelMap[msg.sender][id];
-        //     require(currentLevel < weaponLevelPriceList.length -1, "Your weapon is reached the highest level");
-        //     uint goldPrice = weaponLevelPriceList[currentLevel+1];
-        //     uint goldNum = playerGoldMap[msg.sender];
-        //     require(goldNum >= goldPrice, 'Your gold is not enough!');
-        //     playerGoldMap[msg.sender] -= goldPrice;
-        //     playerWeaponLevelMap[msg.sender][id]++;
-        // } else {
-        //     // buy
-        //     PriceItem memory priceItem = weaponPriceMap[id];
-        //     if(priceItem.priceType == 0) {
-        //         uint goldNum = playerGoldMap[msg.sender];
-        //         require(goldNum >= priceItem.price, 'Your gold is not enough!');
-        //         playerGoldMap[msg.sender] -= priceItem.price;
-        //         playerWeaponMap[msg.sender].push(id);
-        //     } else if(priceItem.priceType == 1) {
-        //         uint diamondNum =  playerDiamondMap[msg.sender];
-        //         require(diamondNum >= priceItem.price, 'Your diamond is not enough!');
-        //         playerDiamondMap[msg.sender] -= priceItem.price;
-        //         playerWeaponMap[msg.sender].push(id);
-        //     }
-        // }
     }
+
+    public entry fun buyOrUpgradeCharacter(account: signer, id: u64) acquires PlayerAsset,GlobalConfig {
+        let account_addr = signer::address_of(&account);
+        // the first check prevents overwriting or miss-managing resources
+        if (!exists<PlayerAsset>(account_addr)) {
+            move_to(&account, PlayerAsset {
+                gold: 999999, // TODO: test
+                diamond: 9999999, // TODO: test
+                // gold: 0,
+                // diamond: 0,
+                weapons: vector[],
+                characters: vector[],
+                weaponLevelMap: simple_map::create(),
+                characterLevelMap: simple_map::create()
+            })
+        };
+        let player_asset = borrow_global_mut<PlayerAsset>(account_addr);
+        let characterList = &player_asset.characters;
+        let length = vector::length(characterList);
+        let found = false;
+        let i = 0;
+        while(i < length) {
+            if(found) {
+                break
+            };
+            let item = *vector::borrow(characterList, i);
+            if (item == id) {
+                found = true;
+            };
+            i = i + 1;
+        };
+        if(!found) {
+            if(id == 0) {
+                vector::push_back(&mut player_asset.characters, id);
+            }
+        };
+
+        let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
+        let characterLevelMap = player_asset.characterLevelMap;
+        if(found || id == 0) {
+            // upgrade
+            if(!simple_map::contains_key(&mut characterLevelMap,&id)) {
+                simple_map::add(&mut characterLevelMap, id , 0); 
+            };
+            let currentLevel = simple_map::borrow_mut(&mut characterLevelMap, &id);
+            
+            assert!(*currentLevel < 4, error::not_found(ENO_IS_REACHED_THE_HEIGHT_LEVEL));
+
+            let characterLevelPriceList = globalConfig.characterLevelPriceList;
+            let goldPrice: u64 = *vector::borrow(&characterLevelPriceList, *currentLevel+1);
+            let gold = player_asset.gold;
+
+            assert!(gold >= goldPrice, error::not_found(ENO_NOT_ENOUGH_GOLD));
+
+            player_asset.gold = player_asset.gold - goldPrice;
+            *currentLevel = *currentLevel + 1;
+
+            player_asset.characterLevelMap = characterLevelMap;
+            event::emit(TestLog {
+                content_key: simple_map::contains_key(&mut characterLevelMap,&id)
+            });
+        } else {
+            // buy
+            let characterPriceMap = globalConfig.characterPriceMap;
+            let priceItem: GamePriceItem = *simple_map::borrow_mut(&mut characterPriceMap,&id);
+            if(priceItem.priceType == 0) {
+                let gold = player_asset.gold;
+                assert!(gold >= priceItem.price, error::not_found(ENO_NOT_ENOUGH_GOLD));
+                player_asset.gold = player_asset.gold - priceItem.price;
+                vector::push_back(&mut player_asset.characters, id);
+                simple_map::add(&mut characterLevelMap, id , 0); 
+                player_asset.characterLevelMap = characterLevelMap;
+            } else if(priceItem.priceType == 1) {
+                let diamond = player_asset.diamond;
+                assert!(diamond >= priceItem.price, error::not_found(ENO_NOT_ENOUGH_DIAMOND));
+                player_asset.diamond = player_asset.diamond - priceItem.price;
+                vector::push_back(&mut player_asset.characters, id);
+                simple_map::add(&mut characterLevelMap, id , 0); 
+                player_asset.characterLevelMap = characterLevelMap;
+            };
+        }
+    }
+
 
     inline fun only_owner(owner: &signer) {
         assert!(signer::address_of(owner) == @hello_blockchain, error::permission_denied(ENOT_OWNER));
