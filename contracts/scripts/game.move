@@ -1,4 +1,4 @@
-module hello_blockchain::adTopList2 {
+module hello_blockchain::adTopList6 {
     use std::error;
     use std::signer;
     use std::vector;
@@ -159,15 +159,7 @@ module hello_blockchain::adTopList2 {
         let account_addr = signer::address_of(&account);
         // the first check prevents overwriting or miss-managing resources
         if (!exists<PlayerAsset>(account_addr)) {
-            move_to(&account, PlayerAsset {
-                gold: 0,
-                diamond: 0,
-                weapons: vector[],
-                characters: vector[],
-                weaponLevelMap: simple_map::create(),
-                characterLevelMap: simple_map::create(),
-                latestLotteryItem: LotteryItem { itemType: 0, num: 0 }
-            })
+            init_player(account);
         };
         let player_asset = borrow_global_mut<PlayerAsset>(account_addr);
         let weaponList = &player_asset.weapons;
@@ -184,19 +176,11 @@ module hello_blockchain::adTopList2 {
             };
             i = i + 1;
         };
-        if(!found) {
-            if(id == 0) {
-                vector::push_back(&mut player_asset.weapons, id);
-            }
-        };
 
         let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
         let weaponLevelMap = player_asset.weaponLevelMap;
-        if(found || id == 0) {
+        if(found) {
             // upgrade
-            if(!simple_map::contains_key(&mut weaponLevelMap,&id)) {
-                simple_map::add(&mut weaponLevelMap, id , 0); 
-            };
             let currentLevel = simple_map::borrow_mut(&mut weaponLevelMap, &id);
 
             assert!(*currentLevel < 4, error::not_found(ENO_IS_REACHED_THE_HEIGHT_LEVEL));
@@ -240,15 +224,7 @@ module hello_blockchain::adTopList2 {
         let account_addr = signer::address_of(&account);
         // the first check prevents overwriting or miss-managing resources
         if (!exists<PlayerAsset>(account_addr)) {
-            move_to(&account, PlayerAsset {
-                gold: 0,
-                diamond: 0,
-                weapons: vector[],
-                characters: vector[],
-                weaponLevelMap: simple_map::create(),
-                characterLevelMap: simple_map::create(),
-                latestLotteryItem: LotteryItem { itemType: 0, num: 0 }
-            })
+            init_player(account);
         };
         let player_asset = borrow_global_mut<PlayerAsset>(account_addr);
         let characterList = &player_asset.characters;
@@ -265,19 +241,11 @@ module hello_blockchain::adTopList2 {
             };
             i = i + 1;
         };
-        if(!found) {
-            if(id == 0) {
-                vector::push_back(&mut player_asset.characters, id);
-            }
-        };
 
         let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
         let characterLevelMap = player_asset.characterLevelMap;
-        if(found || id == 0) {
+        if(found) {
             // upgrade
-            if(!simple_map::contains_key(&mut characterLevelMap,&id)) {
-                simple_map::add(&mut characterLevelMap, id , 0); 
-            };
             let currentLevel = simple_map::borrow_mut(&mut characterLevelMap, &id);
             
             assert!(*currentLevel < 4, error::not_found(ENO_IS_REACHED_THE_HEIGHT_LEVEL));
@@ -321,15 +289,7 @@ module hello_blockchain::adTopList2 {
         let account_addr = signer::address_of(&account);
         // the first check prevents overwriting or miss-managing resources
         if (!exists<PlayerAsset>(account_addr)) {
-            move_to(&account, PlayerAsset {
-                gold: 0,
-                diamond: 0,
-                weapons: vector[],
-                characters: vector[],
-                weaponLevelMap: simple_map::create(),
-                characterLevelMap: simple_map::create(),
-                latestLotteryItem: LotteryItem { itemType: 0, num: 0 }
-            })
+            init_player(account);
         };
 
         let player_asset = borrow_global_mut<PlayerAsset>(account_addr);
@@ -375,11 +335,87 @@ module hello_blockchain::adTopList2 {
         globalConfig.totalLotteryTimes = totalLotteryTimes + 1;
     }
 
+    fun init_player(account: signer) acquires PlayerAsset {
+        move_to(&account, PlayerAsset {
+            gold: 0,
+            diamond: 0,
+            weapons: vector[0],
+            characters: vector[0],
+            weaponLevelMap: simple_map::create(),
+            characterLevelMap: simple_map::create(),
+            latestLotteryItem: LotteryItem { itemType: 0, num: 0 }
+        });
+        let account_addr = signer::address_of(&account);
+        let player_asset = borrow_global_mut<PlayerAsset>(account_addr);
+        let weaponLevelMap = player_asset.weaponLevelMap;
+        let characterLevelMap = player_asset.characterLevelMap;
+        simple_map::add(&mut weaponLevelMap, 0 , 0);
+        player_asset.weaponLevelMap = weaponLevelMap;
+        simple_map::add(&mut characterLevelMap, 0 , 0); 
+        player_asset.characterLevelMap = characterLevelMap;
+    }
+
     #[view]
     public fun getPlayerLastLotteryResult(player: address): (u8, u64) acquires PlayerAsset {
+        if (!exists<PlayerAsset>(player)) {
+            return (0, 0)
+        };
         let player_asset = borrow_global<PlayerAsset>(player);
         let latestLotteryItem: LotteryItem = player_asset.latestLotteryItem;
         (latestLotteryItem.itemType, latestLotteryItem.num)
+    }
+
+    #[view]
+    public fun getPlayerAllWeaponsInfo(player: address): (vector<u64>, vector<u64>) acquires PlayerAsset {
+         if (!exists<PlayerAsset>(player)) {
+            return (vector[0], vector[0])
+        };
+        let player_asset = borrow_global<PlayerAsset>(player);
+        let weaponList = &player_asset.weapons;
+        let weaponLevelMap = player_asset.weaponLevelMap;
+        let length = vector::length(weaponList);
+
+        let weaponLevelList: vector<u64> = vector[];
+        let i = 0;
+        while(i < length) {
+            let item = *vector::borrow(weaponList, i);
+            let currentLevel = *simple_map::borrow_mut(&mut weaponLevelMap, &item);
+            vector::push_back(&mut weaponLevelList, currentLevel);
+            i = i + 1;
+        };
+
+        (*weaponList, weaponLevelList)
+    }
+
+    #[view]
+    public fun getPlayerAllCharactersInfo(player: address): (vector<u64>, vector<u64>) acquires PlayerAsset {
+         if (!exists<PlayerAsset>(player)) {
+            return (vector[0], vector[0])
+        };
+        let player_asset = borrow_global<PlayerAsset>(player);
+        let characterList = &player_asset.characters;
+        let characterLevelMap = player_asset.characterLevelMap;
+        let length = vector::length(characterList);
+
+        let characterLevelList: vector<u64> = vector[];
+        let i = 0;
+        while(i < length) {
+            let item = *vector::borrow(characterList, i);
+            let currentLevel = *simple_map::borrow_mut(&mut characterLevelMap, &item);
+            vector::push_back(&mut characterLevelList, currentLevel);
+            i = i + 1;
+        };
+
+        (*characterList, characterLevelList)
+    }
+
+    #[view]
+    public fun getPlayerAllAssets(player: address): (u64, u64) acquires PlayerAsset {
+         if (!exists<PlayerAsset>(player)) {
+            return (0, 0)
+        };
+        let player_asset = borrow_global<PlayerAsset>(player);
+        (player_asset.gold, player_asset.diamond)
     }
 
     inline fun only_owner(owner: &signer) {
