@@ -5,7 +5,7 @@ interface Window {
   onConnectButtonClick: Function;
   onConnectedButtonClick: Function;
   switchNetwork: Function;
-  isMovementNetwork: boolean;
+  isAptosTestnet: boolean;
   storageContract: Readonly<ContractOptions<[]>>;
   // read function
   getTopListInfo: (onSuccess?: (receipt: any) => void) => Promise<void>;

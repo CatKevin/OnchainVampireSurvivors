@@ -4,23 +4,22 @@ import { Network } from "@aptos-labs/ts-sdk";
 import { AccountInfo, UserResponseStatus } from "@aptos-labs/wallet-standard";
 import { getAdapter } from "./misc/adapter";
 import { toast } from "sonner";
-import { networkMap } from "./misc/utils";
-import { getMovement } from "./misc/movement";
 import { BUY_OR_UPGRADE_CHARACTER_FUNCTION, BUY_OR_UPGRADE_WEAPON_FUNCTION, GAME_OVER_FUNCTION, GET_PLAYER_ALL_ASSETS_FUNCTION, GET_PLAYER_ALL_CHARACTERS_INFO_FUNCTION, GET_PLAYER_ALL_WEAPONS_INFO_FUNCTION, GET_PLAYER_LAST_LOTTERY_RESULT_FUNCTION, GET_TOP_LIST_INFO_FUNCTION, MINT_GOLD_FUNCTION, REQUEST_LOTTERY_FUNCTION, START_GAME_FUNCTION } from "./config";
+import { networkMap } from "./misc/utils";
+import { getAptos } from "./misc/aptos";
 
 export function App() {
   const [userAccount, setUserAccount] = useState<AccountInfo>();
-  const [currentNetwork, setCurrentNetwork] = useState<string>();
   const [chainId, setChainId] = useState<number>();
 
   useEffect(() => {
-    const setIsMovement = async () => {
+    const setIsAptosTestnet = async () => {
       const adapter = await getAdapter();
       const network = await adapter.network();
-      window.isMovementNetwork = network.chainId === 27;
+      window.isAptosTestnet = network.chainId === 2;
       setChainId(network.chainId);
     };
-    setIsMovement();
+    setIsAptosTestnet();
   }, [chainId]);
 
   useEffect(() => {
@@ -28,17 +27,19 @@ export function App() {
       const adapter = await getAdapter();
       if (await adapter.canEagerConnect()) {
         try {
-          const response = await adapter.connect();
+          const response = await adapter.connect(undefined, networkMap[2]);
           if (response.status === UserResponseStatus.APPROVED) {
             setUserAccount(response.args);
             window.userAccount = response.args.address.toString();
             const network = await adapter.network();
-            setCurrentNetwork(network.chainId === 27 ? "Aptos" : "Movement");
             setChainId(network.chainId);
+            window.isAptosTestnet = network.chainId === 2;
           }
         } catch (error) {
           await adapter.disconnect().catch(() => {});
+          setUserAccount(undefined);
           console.log(error);
+          window.isAptosTestnet = false;
         }
       }
       // Events
@@ -63,7 +64,11 @@ export function App() {
       });
 
       adapter.on("networkChange", (networkInfo) => {
-        window.isMovementNetwork = networkInfo.chainId === 27;
+        window.isAptosTestnet = networkInfo.chainId === 2;
+        if(networkInfo.chainId !== 2) {
+          setUserAccount(undefined);
+          window.userAccount = undefined;
+        }
       });
     };
     init();
@@ -77,17 +82,13 @@ export function App() {
   const onConnect = async () => {
     const adapter = await getAdapter();
     try {
-      const response = await adapter.connect(undefined, {
-        chainId: 27,
-        name: Network.CUSTOM,
-        url: "https://aptos.testnet.suzuka.movementlabs.xyz/v1",
-      });
+      const response = await adapter.connect(undefined, networkMap[2]);
       if (response.status === UserResponseStatus.APPROVED) {
         setUserAccount(response.args);
         window.userAccount = response.args.address.toString();
         const network = await adapter.network();
-        setCurrentNetwork(network.chainId === 27 ? "Aptos" : "Movement");
         setChainId(network.chainId);
+        window.isAptosTestnet = network.chainId === 2;
         toast.success("Wallet connected!");
       } else {
         toast.error("User rejected connection");
@@ -102,16 +103,13 @@ export function App() {
     try {
       // Check chainId
       const chainId = await adapter.network();
-      if (chainId.chainId !== 27) {
-        // If chainId is different than 4 (movement devnet) change it
-        const changeNetworkResponse = await adapter.changeNetwork({
-          chainId: 27,
-          name: Network.CUSTOM,
-          url: "https://aptos.testnet.suzuka.movementlabs.xyz/v1",
-        });
+      window.isAptosTestnet = chainId.chainId === 2;
+      if (chainId.chainId !== 2) {
+        const changeNetworkResponse = await adapter.changeNetwork(networkMap[2]);
         if (changeNetworkResponse.status === UserResponseStatus.APPROVED) {
-          setCurrentNetwork(chainId.chainId === 27 ? "Movement" : "Aptos");
-          setChainId(chainId.chainId);
+          const network = await adapter.network();
+          window.isAptosTestnet = network.chainId === 2;
+          setChainId(network.chainId);
           toast.success("Network changed!");
         } else {
           toast.error("User rejected network change");
@@ -125,27 +123,25 @@ export function App() {
 
   const onDisconnect = async () => {
     try {
-      console.log("start");
       const adapter = await getAdapter();
-      console.log(adapter);
       await adapter.disconnect();
-      console.log("done");
       setUserAccount(undefined);
       window.userAccount = undefined;
+      window.isAptosTestnet = false;
     } catch (error) {
       console.log(error);
     }
   };
 
-  const switchToMovementAptosTestnet = async () => {
+  const switchToAptosTestnet = async () => {
     try {
       const adapter = await getAdapter();
       const network = await adapter.network();
-
+      window.isAptosTestnet = network.chainId === 2;
+      
       let changeNetworkResponse;
-      if (network.chainId !== 27) {
-        // Aptos network is active (mainnet, devnet or testnet)
-        changeNetworkResponse = await adapter.changeNetwork(networkMap[27]);
+      if (network.chainId !== 2) {
+        changeNetworkResponse = await adapter.changeNetwork(networkMap[2]);
       }
 
       if (
@@ -153,9 +149,8 @@ export function App() {
         changeNetworkResponse.status === UserResponseStatus.APPROVED
       ) {
         const changedNetwork = await adapter.network();
-        toast.success(`Changed network to ${currentNetwork}!`);
-        setCurrentNetwork(changedNetwork.chainId === 27 ? "Aptos" : "Movement");
         setChainId(changedNetwork.chainId);
+        window.isAptosTestnet = changedNetwork.chainId === 2;
       }
     } catch (error) {
       toast.error("Couldn't change network");
@@ -165,7 +160,7 @@ export function App() {
 
   window.onConnectButtonClick = onConnect;
   window.onConnectedButtonClick = onDisconnect;
-  window.switchNetwork = switchToMovementAptosTestnet;
+  window.switchNetwork = switchToAptosTestnet;
 
   /// ###########################################
   /// read contract function
@@ -176,7 +171,7 @@ export function App() {
       let accountAddress = userAccount?.address.toString();
       console.log('accountAddress:', accountAddress)
       if (accountAddress) {
-        const aptos = getMovement(27);
+        const aptos = getAptos();
         const data = await aptos.view({
           payload: {
             function: GET_TOP_LIST_INFO_FUNCTION,
@@ -199,7 +194,7 @@ export function App() {
     try {
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
-        const aptos = getMovement(27);
+        const aptos = getAptos();
         const data = await aptos.view({
           payload: {
             function: GET_PLAYER_ALL_ASSETS_FUNCTION,
@@ -222,7 +217,7 @@ export function App() {
     try {
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
-        const aptos = getMovement(27);
+        const aptos = getAptos();
         const data = await aptos.view({
           payload: {
             function: GET_PLAYER_ALL_WEAPONS_INFO_FUNCTION,
@@ -245,7 +240,7 @@ export function App() {
     try {
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
-        const aptos = getMovement(27);
+        const aptos = getAptos();
         const data = await aptos.view({
           payload: {
             function: GET_PLAYER_ALL_CHARACTERS_INFO_FUNCTION,
@@ -268,7 +263,7 @@ export function App() {
     try {
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
-        const aptos = getMovement(27);
+        const aptos = getAptos();
         const data = await aptos.view({
           payload: {
             function: GET_PLAYER_LAST_LOTTERY_RESULT_FUNCTION,
@@ -302,7 +297,7 @@ export function App() {
     onError?: (receipt: any) => void
   ) => {
     try {
-      const aptos = getMovement(27);
+      const aptos = getAptos();
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
         const transaction = await aptos.transaction.build.simple({
@@ -346,7 +341,7 @@ export function App() {
     onError?: (receipt: any) => void
   ) => {
     try {
-      const aptos = getMovement(27);
+      const aptos = getAptos();
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
         const transaction = await aptos.transaction.build.simple({
@@ -389,7 +384,7 @@ export function App() {
     onError?: (receipt: any) => void
   ) => {
     try {
-      const aptos = getMovement(27);
+      const aptos = getAptos();
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
         const transaction = await aptos.transaction.build.simple({
@@ -432,7 +427,7 @@ export function App() {
     onError?: (receipt: any) => void
   ) => {
     try {
-      const aptos = getMovement(27);
+      const aptos = getAptos();
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
         const transaction = await aptos.transaction.build.simple({
@@ -474,7 +469,7 @@ export function App() {
     onError?: (receipt: any) => void
   ) => {
     try {
-      const aptos = getMovement(27);
+      const aptos = getAptos();
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
         const transaction = await aptos.transaction.build.simple({
@@ -516,7 +511,7 @@ export function App() {
     onError?: (receipt: any) => void
   ) => {
     try {
-      const aptos = getMovement(27);
+      const aptos = getAptos();
       let accountAddress = userAccount?.address.toString();
       if (accountAddress) {
         const transaction = await aptos.transaction.build.simple({
@@ -601,7 +596,7 @@ export function App() {
           <div className="absolute inset-0 bg-black stars-bg animate-move-stars z-0"></div>
         </button>
         <button onClick={switchToMovementAptosTestnet}>
-          changeNetwork to {currentNetwork}
+          changeNetwork to ...
         </button>
         <br></br>
         <button>chainId: {chainId}</button>

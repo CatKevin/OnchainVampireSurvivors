@@ -77,7 +77,7 @@ export default class UILoadingPage extends UIPage {
               window.userAccount.slice(-4);
             
             this._BtnLogin.active = false;
-            if(window.isMovementNetwork) {
+            if(window.isAptosTestnet) {
               this._BtnWallet.active = true;
               this._BtnStartGame.active = true;
               this._BtnSwitch.active = false;

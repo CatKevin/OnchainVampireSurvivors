@@ -12,14 +12,9 @@ export const networkMap: Record<number, AptosChangeNetworkInput> = {
     name: Network.TESTNET,
     url: "https://fullnode.testnet.aptoslabs.com/v1",
   },
-  147: {
-    chainId: 147,
+  149: {
+    chainId: 140,
     name: Network.DEVNET,
     url: "https://fullnode.devnet.aptoslabs.com/v1",
-  },
-  27: {
-    chainId: 27,
-    name: Network.CUSTOM,
-    url: "https://aptos.testnet.suzuka.movementlabs.xyz/v1",
   },
 };
