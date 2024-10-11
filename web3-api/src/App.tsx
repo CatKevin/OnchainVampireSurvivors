@@ -43,7 +43,7 @@ export function App() {
         }
       }
       // Events
-      adapter.on("connect", (accInfo) => {
+      adapter.on("connect", (accInfo: any) => {
         if (accInfo && "address" in accInfo) {
           setUserAccount(accInfo);
           window.userAccount = accInfo.address.toString();
@@ -56,14 +56,14 @@ export function App() {
         console.log("adapter disconnected");
       });
 
-      adapter.on("accountChange", (accInfo) => {
+      adapter.on("accountChange", (accInfo: any) => {
         if (accInfo && "address" in accInfo) {
           setUserAccount(accInfo);
           window.userAccount = accInfo.address.toString();
         }
       });
 
-      adapter.on("networkChange", (networkInfo) => {
+      adapter.on("networkChange", (networkInfo: any) => {
         window.isAptosTestnet = networkInfo.chainId === 2;
         if(networkInfo.chainId !== 2) {
           setUserAccount(undefined);
