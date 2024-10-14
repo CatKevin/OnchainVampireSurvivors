@@ -1,22 +1,29 @@
-module hello_blockchain::onchainVampireSurvivorsV01 {
+// OnchainVampireSurvivors is a Aptos-based survival game 
+// with roguelite elements that integrates over 100 wallets using Nightly Connect technology, 
+// offering an immersive and strategic experience with low gas consumption and an on-chain ranking system.
+module AptosCodeCollision::onchainVampireSurvivors {
     use std::error;
     use std::signer;
     use std::vector;
     use std::string;
     use aptos_framework::event;
     use aptos_framework::timestamp;
+    use aptos_framework::randomness;
     use std::simple_map::{SimpleMap, Self};
 
+    // Define some error codes
     const ENOT_OWNER: u64 = 1;
     const EPLAYER_LATEST_GAME_DATA: u64 = 2;
     const EPLAYER_INVALID: u64 = 3;
     const EIS_REACHED_THE_HEIGHT_LEVEL: u64 = 4;
     const ENOT_ENOUGH_GOLD: u64 = 5;
     const ENOT_ENOUGH_DIAMOND: u64 = 6;
-    const ENOT_VALID_TIME: u64 = 6;
+    const ENOT_VALID_TIME: u64 = 7;
 
+    // Maximum number of leaderboards
     const MAX_LEADERBOARD: u64 = 10;
 
+    // Leaderboard Object
     struct Leaderboard has key {
         leaderboard_list: vector<LeaderboardItem>,
         total_game_time: u64,
@@ -24,6 +31,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         update_time: u64
     }
 
+    // Leaderboard Item Object
     struct LeaderboardItem has store, copy, drop {
         sender: address,
         duration: u64,
@@ -31,6 +39,8 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         create_time: u64
     }
 
+    // Player Latest Game Data
+    // stores the player's performance in the latest game
     struct PlayerLatestGameData has key {
         player: address,
         start_time: u64,
@@ -39,6 +49,8 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         kills: u64
     }
 
+    // Player Asset
+    // The player's game assets, including gold coins, diamonds, weapons, skins and their attributes, etc.
     struct PlayerAsset has key {
         gold: u64,
         diamond: u64,
@@ -49,6 +61,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         latestLotteryItem: LotteryItem
     }
 
+    // The global settings of the game
     struct GlobalConfig has key {
         weaponPriceMap: SimpleMap<u64, GamePriceItem>,
         characterPriceMap: SimpleMap<u64, GamePriceItem>,
@@ -114,11 +127,13 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         init_global_config(owner);
     }
 
+    // init leaderboard config
     fun init_leaderboard(owner: &signer) {
         only_owner(owner);
         move_to(owner, Leaderboard { leaderboard_list: vector[], last_one_index: 0, total_game_time: 0, update_time: timestamp::now_seconds() });
     }
     
+    // init global config
     fun init_global_config(owner: &signer)  acquires GlobalConfig {
         only_owner(owner);
         // init
@@ -131,7 +146,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
             totalLotteryTimes: 0
         });
         // set data
-       let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
+       let globalConfig = borrow_global_mut<GlobalConfig>(@AptosCodeCollision);
         // weapon price
         simple_map::add(&mut globalConfig.weaponPriceMap, 0, GamePriceItem {priceType: 0, price: 0});
         simple_map::add(&mut globalConfig.weaponPriceMap, 1, GamePriceItem {priceType: 0, price: 1000});
@@ -175,8 +190,9 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         vector::push_back(&mut globalConfig.lotteryItemList, LotteryItem {itemType: 0, num: 200 });
     }
 
+    // The player starts a new game
     public entry fun start_game(account: signer) acquires Leaderboard,PlayerLatestGameData {
-        let leaderboard = borrow_global_mut<Leaderboard>(@hello_blockchain);
+        let leaderboard = borrow_global_mut<Leaderboard>(@AptosCodeCollision);
 
         let account_addr = signer::address_of(&account);
         let start_time = timestamp::now_seconds();
@@ -207,6 +223,8 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         leaderboard.total_game_time = leaderboard.total_game_time + 1;
     }
 
+    // game over and submit data
+    // used some specific algorithms and data structures to save the data to the leaderboard
     public entry fun game_over(account: signer, duration: u64, kills: u64) acquires Leaderboard,PlayerLatestGameData,PlayerAsset {
         let account_addr = signer::address_of(&account);
         // the first check prevents overwriting or miss-managing resources
@@ -246,7 +264,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         player_asset.diamond = player_asset.diamond + kills / 100;
 
         // push to Leaderboard
-        let leaderboard = borrow_global_mut<Leaderboard>(@hello_blockchain);
+        let leaderboard = borrow_global_mut<Leaderboard>(@AptosCodeCollision);
         let leaderboard_item = LeaderboardItem {
             sender: account_addr,
             duration,
@@ -268,6 +286,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         leaderboard.last_one_index = min_index;
     }
 
+    // buy or upgrade weapon
     public entry fun buy_or_upgrade_weapon(account: signer, id: u64) acquires PlayerAsset,GlobalConfig {
         let account_addr = signer::address_of(&account);
         // the first check prevents overwriting or miss-managing resources
@@ -290,7 +309,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
             i = i + 1;
         };
 
-        let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
+        let globalConfig = borrow_global_mut<GlobalConfig>(@AptosCodeCollision);
         let weaponLevelMap = player_asset.weaponLevelMap;
         if(found) {
             // upgrade
@@ -349,6 +368,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         }
     }
 
+    // buy or upgrade character
     public entry fun buy_or_upgrade_character(account: signer, id: u64) acquires PlayerAsset,GlobalConfig {
         let account_addr = signer::address_of(&account);
         // the first check prevents overwriting or miss-managing resources
@@ -371,7 +391,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
             i = i + 1;
         };
 
-        let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
+        let globalConfig = borrow_global_mut<GlobalConfig>(@AptosCodeCollision);
         let characterLevelMap = player_asset.characterLevelMap;
         if(found) {
             // upgrade
@@ -431,7 +451,10 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         }
     }
 
-    public entry fun request_lottery(account: signer) acquires GlobalConfig, PlayerAsset {
+    // lottery
+    // Aptos Randomness API ensures that every draw is safe and random.
+    #[randomness]
+    entry fun request_lottery(account: signer) acquires GlobalConfig, PlayerAsset {
         let account_addr = signer::address_of(&account);
         // the first check prevents overwriting or miss-managing resources
         if (!exists<PlayerAsset>(account_addr)) {
@@ -439,13 +462,12 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         };
 
         let player_asset = borrow_global_mut<PlayerAsset>(account_addr);
-        let globalConfig = borrow_global_mut<GlobalConfig>(@hello_blockchain);
+        let globalConfig = borrow_global_mut<GlobalConfig>(@AptosCodeCollision);
         let totalLotteryTimes = globalConfig.totalLotteryTimes;
         let lotteryItemList = &globalConfig.lotteryItemList;
         let length = vector::length(lotteryItemList);
-        let random = aptos_framework::timestamp::now_microseconds() + totalLotteryTimes;
-        let randomIndex = random % length;
-        let lotteryItem: LotteryItem = *vector::borrow(lotteryItemList, randomIndex);
+        let random = randomness::u64_range(0, length);
+        let lotteryItem: LotteryItem = *vector::borrow(lotteryItemList, random);
 
         player_asset.latestLotteryItem = lotteryItem;
 
@@ -481,6 +503,10 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         globalConfig.totalLotteryTimes = totalLotteryTimes + 1;
     }
 
+    // mint gold
+    // This method is only used for testing, because players can only get gold by playing games. 
+    // This method allows players to quickly experience the function of purchasing or upgrading weapons.
+    // After the game is launched on the mainnet, this method may be changed to using Aptos Token to purchase.
     public entry fun mint_gold(account: signer) acquires PlayerAsset {
         let account_addr = signer::address_of(&account);
         // the first check prevents overwriting or miss-managing resources
@@ -500,6 +526,8 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         });
     }
 
+    // init player
+    // Each player has a soul-bound NFT, which describes the player's status and assets in the game.
     fun init_player(account: signer) acquires PlayerAsset {
         move_to(&account, PlayerAsset {
             gold: 0,
@@ -520,19 +548,21 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         player_asset.characterLevelMap = characterLevelMap;
     }
 
+    // clear leaderboard
     public entry fun clear_leaderboard(owner: &signer) acquires Leaderboard {
         only_owner(owner);
 
-        let leaderboard = borrow_global_mut<Leaderboard>(@hello_blockchain);
+        let leaderboard = borrow_global_mut<Leaderboard>(@AptosCodeCollision);
 
         leaderboard.leaderboard_list = vector[];
         leaderboard.update_time = timestamp::now_seconds();
         leaderboard.last_one_index = 0;
     }
 
+    // get the leaderboard
     #[view]
     public fun get_top_list_info(): (vector<LeaderboardItem>, u64) acquires Leaderboard {
-        let leaderboard = borrow_global<Leaderboard>(@hello_blockchain);
+        let leaderboard = borrow_global<Leaderboard>(@AptosCodeCollision);
 
         let leaderboard_list = vector[];
         vector::for_each(leaderboard.leaderboard_list, |m| vector::push_back(&mut leaderboard_list, m));
@@ -544,7 +574,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
 
     #[view]
     public fun get_leaderboard_kills_min_index(): u64 acquires Leaderboard {
-        let leaderboard = borrow_global<Leaderboard>(@hello_blockchain);
+        let leaderboard = borrow_global<Leaderboard>(@AptosCodeCollision);
         let min_index = find_min_kills_index(&leaderboard.leaderboard_list);
 
         min_index
@@ -573,6 +603,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         min_index
     }
 
+    // get the result of the player's current lottery
     #[view]
     public fun get_player_last_lottery_result(player: address): (u8, u64) acquires PlayerAsset {
         if (!exists<PlayerAsset>(player)) {
@@ -583,6 +614,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         (latestLotteryItem.itemType, latestLotteryItem.num)
     }
 
+    // get the player's weapon data
     #[view]
     public fun get_player_all_weapons_info(player: address): (vector<u64>, vector<u64>) acquires PlayerAsset {
          if (!exists<PlayerAsset>(player)) {
@@ -605,6 +637,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         (*weaponList, weaponLevelList)
     }
 
+    // get the player's character data
     #[view]
     public fun get_player_all_characters_info(player: address): (vector<u64>, vector<u64>) acquires PlayerAsset {
          if (!exists<PlayerAsset>(player)) {
@@ -627,6 +660,7 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
         (*characterList, characterLevelList)
     }
 
+    // get the player's gold and diamond data
     #[view]
     public fun get_player_all_assets(player: address): (u64, u64) acquires PlayerAsset {
          if (!exists<PlayerAsset>(player)) {
@@ -637,6 +671,6 @@ module hello_blockchain::onchainVampireSurvivorsV01 {
     }
 
     inline fun only_owner(owner: &signer) {
-        assert!(signer::address_of(owner) == @hello_blockchain, error::permission_denied(ENOT_OWNER));
+        assert!(signer::address_of(owner) == @AptosCodeCollision, error::permission_denied(ENOT_OWNER));
     }
 }

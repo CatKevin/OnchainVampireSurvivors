@@ -1,10 +1,10 @@
 [package]
-name = "onchainVampireSurvivors-1.0.0"
-version = "1.0.0"
+name = "onchainVampireSurvivors-1.0.2"
+version = "1.0.2"
 authors = []
 
 [addresses]
-hello_blockchain = "_"
+AptosCodeCollision = "_"
 
 [dev-addresses]
 
