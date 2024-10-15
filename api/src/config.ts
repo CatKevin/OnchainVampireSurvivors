@@ -1,6 +1,6 @@
 // Define the module address and functions
-export const MODULE_ADDRESS = "0x1a17b51ea19bfded75faeea40758a0635928857110ee2ac6e43a2c72a712d1f5";
-export const MODULE_NAME = "onchainVampireSurvivorsV01";
+export const MODULE_ADDRESS = "0xb187cca2a31f8796e2e44e1888c702010cc124bf93b85bd286e3e6499ec5666f";
+export const MODULE_NAME = "onchainVampireSurvivors";
 
 // write
 export const START_GAME_FUNCTION = `${MODULE_ADDRESS}::${MODULE_NAME}::start_game`;
