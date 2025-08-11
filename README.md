@@ -123,7 +123,8 @@ Due to the limitations of the game engine, I couldn't use ThirdWeb SDK or Web3 S
 - Currently weapons and character skins are pre-designed. I would like to introduce generative AI technology so that players can draw or generate assets such as weapons and character skins by themselves, which will greatly increase the randomness and fun of the game.
 - Deploy it on Somnia Mainnet.
 
-
+## Smart Contract on Somnia Testnet
+[0xCAe1ddbe4e3865C82CdBc543E02732E23e8Bd924](https://shannon-explorer.somnia.network/address/0xCAe1ddbe4e3865C82CdBc543E02732E23e8Bd924)
 
 ## Thank you for reading
 Thank you for your patience in reading this document. It is very long and took you a lot of time! Thank you very much!
