@@ -4,7 +4,7 @@ import {
   useActiveWalletChain,
   useConnectedWallets,
 } from "thirdweb/react";
-import { client, GameContract, thetaTestnet } from "./client";
+import { client, GameContract, somniaTestnet } from "./client";
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import {
   prepareContractCall,
@@ -37,7 +37,7 @@ export function App() {
   }, [wallet]);
 
   useEffect(() => {
-    if (chainId?.id == thetaTestnet.id) {
+    if (chainId?.id == somniaTestnet.id) {
       window.isBaseSepoliaNetwork = true;
     } else {
       window.isBaseSepoliaNetwork = false;
@@ -74,7 +74,7 @@ export function App() {
   ) => {
     const data = await readContract({
       contract: GameContract,
-      method: "function getTopListInfo() view returns (uint256[10], uint256[10], address[10], uint256)", 
+      method: "getTopListInfo", 
       params: [],
     });
     onSuccess?.(data);
@@ -87,7 +87,7 @@ export function App() {
     if(account) {
       const data = await readContract({
         contract: GameContract,
-        method: "function getPlayerAllAssets(address player) view returns (uint256 gold, uint256 diamond)", 
+        method: "getPlayerAllAssets", 
         params: [account],
       });
       onSuccess?.(data);
@@ -101,7 +101,7 @@ export function App() {
     if(account) {
       const data = await readContract({
         contract: GameContract,
-        method: "function getPlayerLastLotteryResult(address player) view returns (uint256 itemType, uint256 num)", 
+        method: "getPlayerLastLotteryResult", 
         params: [account],
       });
       onSuccess?.(data);
@@ -115,7 +115,7 @@ export function App() {
     if(account) {
       const data = await readContract({
         contract: GameContract,
-        method: "function getPlayerAllWeaponInfo(address player) view returns (uint256[] weaponIdList, uint256[] weaponLevelList)", 
+        method: "getPlayerAllWeaponInfo", 
         params: [account],
       });
       onSuccess?.(data);
@@ -129,7 +129,7 @@ export function App() {
     if(account) {
       const data = await readContract({
         contract: GameContract,
-        method: "function getPlayerAllSkinInfo(address player) view returns (uint256[] skinIdList, uint256[] skinLevelList)", 
+        method: "getPlayerAllSkinInfo", 
         params: [account],
       });
       onSuccess?.(data);
@@ -155,7 +155,7 @@ export function App() {
       if (account) {
         const transaction = prepareContractCall({
           contract: GameContract,
-          method: "function startGame() payable", 
+          method: "startGame", 
           params: [],
           value: BigInt(10**16), // gas token amount for payable function
         });
@@ -194,7 +194,7 @@ export function App() {
       if (account) {
         const transaction = prepareContractCall({
           contract: GameContract,
-          method: "function gameOver(uint256 time, uint256 kills)", 
+          method: "gameOver", 
           params: [time, kills] 
         });
         const transactionResult = await sendTransaction({
@@ -231,7 +231,7 @@ export function App() {
       if (account) {
         const transaction = prepareContractCall({
           contract: GameContract,
-          method: "function buyOrUpgradeSkin(uint256 id)", 
+          method: "buyOrUpgradeSkin", 
           params: [id] 
         });
         const transactionResult = await sendTransaction({
@@ -268,7 +268,7 @@ export function App() {
       if (account) {
         const transaction = prepareContractCall({
           contract: GameContract,
-          method: "function buyOrUpgradeWeapon(uint256 id)", 
+          method: "buyOrUpgradeWeapon", 
           params: [id] 
         });
         const transactionResult = await sendTransaction({
@@ -304,7 +304,7 @@ export function App() {
       if (account) {
         const transaction = await prepareContractCall({
           contract: GameContract,
-          method: "function requestLottery() payable", 
+          method: "requestLottery", 
           params: [] ,
           value: BigInt(4*(10**16)), // gas token amount for payable function
         });
@@ -341,7 +341,7 @@ export function App() {
       if (account) {
         const transaction = await prepareContractCall({
           contract: GameContract,
-          method: "function mintGold() payable", 
+          method: "mintGold", 
           params: [],
           value: BigInt(10**16), // gas token amount for payable function
         });
@@ -378,7 +378,7 @@ export function App() {
       if (account) {
         const transaction = await prepareContractCall({
           contract: GameContract,
-          method: "function reLive() payable", 
+          method: "reLive", 
           params: [],
           value: BigInt(5*(10**16)), // gas token amount for payable function
         });
@@ -420,7 +420,7 @@ export function App() {
   return (
     <main>
       <div style={{ display: "none" }}>
-        <ConnectButton client={client} wallets={wallets} chain={thetaTestnet} />
+        <ConnectButton client={client} wallets={wallets} chain={somniaTestnet} />
       </div>
     </main>
   );
