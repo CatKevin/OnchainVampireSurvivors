@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.30;
 
 import "@thirdweb-dev/contracts/extension/Ownable.sol";
 
@@ -147,7 +147,7 @@ contract ZKGameClient is Ownable {
 
     function startGame() public payable {
         // pay gas token
-        uint gasTokenAmountToPay = 10**16; // 0.01 STT
+        uint gasTokenAmountToPay = 10**16; // 0.01 PUSH
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
 
         // save log
@@ -166,7 +166,7 @@ contract ZKGameClient is Ownable {
 
     function reLive() public payable {
         // pay gas token
-        uint gasTokenAmountToPay = 5*10**16; // 0.05 STT
+        uint gasTokenAmountToPay = 5*10**16; // 0.05 PUSH
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
 
         // distribution
@@ -273,7 +273,7 @@ contract ZKGameClient is Ownable {
 
     function mintGold()  external payable {
         // pay gas token
-        uint gasTokenAmountToPay = 10**16; // 0.01 STT
+        uint gasTokenAmountToPay = 10**16; // 0.01 PUSH
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
         playerGoldMap[msg.sender] += 500;
     }
@@ -286,7 +286,7 @@ contract ZKGameClient is Ownable {
     // lottery
     function requestLottery() external payable {
         // pay gas token
-        uint gasTokenAmountToPay = 4*10**16; // 0.04 STT
+        uint gasTokenAmountToPay = 4*10**16; // 0.04 PUSH
         require(msg.value >= gasTokenAmountToPay,"Gas Token is not enough!");
 
         totalLotteryTimes = totalLotteryTimes + 1;
