@@ -1,6 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.30;
+pragma solidity ^0.8.22;
 
+// Universal Account ID Struct and IUEAFactory Interface
+struct UniversalAccountId {
+    string chainNamespace;
+    string chainId;
+    bytes owner;
+}
+
+interface IUEAFactory {
+    function getOriginForUEA(address addr) external view returns (UniversalAccountId memory account, bool isUEA);
+}
 
 interface IOwnable {
     /// @dev Returns the owner of the contract.
@@ -125,6 +135,7 @@ contract ZKGameClient is Ownable {
     uint[10] public topGradeList; // Top 10 grade List, kills
     uint[10] public topTimeList; // Top 10 grade List, timestamp
     address[10] public topPlayerList; // Top 10 player List, address
+    bytes32[10] public topPlayerChainHashList; // Top 10 player chainHash List, bytes32
     uint public lastUpdateTime; // last update time of topList
 
     /// log
@@ -419,6 +430,9 @@ contract ZKGameClient is Ownable {
         uint kills = messageItem.kills;
         address player = messageItem.player;
 
+        (UniversalAccountId memory originAccount, bool isUEA) =
+            IUEAFactory(0x00000000000000000000000000000000000000eA).getOriginForUEA(player);
+
         if(topGradeList[topGradeList.length -1] < kills) {
             uint left = 0;
             uint right = topGradeList.length - 1;
@@ -437,17 +451,25 @@ contract ZKGameClient is Ownable {
                 topGradeList[i] = topGradeList[i - 1];
                 topTimeList[i] = topTimeList[i - 1];
                 topPlayerList[i] = topPlayerList[i - 1];
+                topPlayerChainHashList[i] = topPlayerChainHashList[i - 1];
             }
             topGradeList[left] = kills;
             topTimeList[left] = time;
             topPlayerList[left] = player;
+            if (!isUEA) {
+                // If it's a native Push Chain EOA (isUEA = false)
+                topPlayerChainHashList[left] = "PUSH";
+            } else {
+                bytes32 chainHash = keccak256(abi.encodePacked(originAccount.chainNamespace, originAccount.chainId));
+                topPlayerChainHashList[left] = chainHash;
+            }
         }
 
         lastUpdateTime = block.timestamp;
     }
 
-    function getTopListInfo() public view returns (uint[10] memory , uint[10] memory, address[10] memory, uint) {
-        return (topGradeList, topTimeList, topPlayerList, lastUpdateTime);
+    function getTopListInfo() public view returns (uint[10] memory , uint[10] memory, address[10] memory, bytes32[10] memory, uint) {
+        return (topGradeList, topTimeList, topPlayerList, topPlayerChainHashList, lastUpdateTime);
     }
 
     function _canSetOwner() internal virtual view override returns (bool) {

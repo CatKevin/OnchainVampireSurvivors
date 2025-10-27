@@ -2,69 +2,11 @@ import { PushUI } from "@pushchain/ui-kit";
 
 export const CHAIN_NETWORK = PushUI.CONSTANTS.PUSH_NETWORK.TESTNET;
 
-export const GAME_CONTRACT_ADDRESS = "0xD42893fF04e15a6c4021103e0E2f046968278293";
+export const GAME_CONTRACT_ADDRESS = "0xd7dC09839B00B15916A747070b888cC812C12Aca";
 
 export const JSON_RPC_PROVIDER = "https://evm.rpc-testnet-donut-node1.push.org/";
 
 export const GAME_ABI = [
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			}
-		],
-		"name": "buyOrUpgradeSkin",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			}
-		],
-		"name": "buyOrUpgradeWeapon",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "time",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "kills",
-				"type": "uint256"
-			}
-		],
-		"name": "gameOver",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "initLotteryList",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "initWeaponAndSkinData",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -113,13 +55,6 @@ export const GAME_ABI = [
 		"type": "event"
 	},
 	{
-		"inputs": [],
-		"name": "mintGold",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -137,20 +72,6 @@ export const GAME_ABI = [
 		],
 		"name": "OwnerUpdated",
 		"type": "event"
-	},
-	{
-		"inputs": [],
-		"name": "reLive",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "requestLottery",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
 	},
 	{
 		"anonymous": false,
@@ -192,26 +113,68 @@ export const GAME_ABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "_newOwner",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
-		"name": "setOwner",
+		"name": "LotteryItemList",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "itemType",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "num",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "salt",
+				"type": "uint256"
+			}
+		],
+		"name": "VRF",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "buyOrUpgradeSkin",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "startGame",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "testWeaponSkin",
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "buyOrUpgradeWeapon",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -253,6 +216,24 @@ export const GAME_ABI = [
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "time",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "kills",
+				"type": "uint256"
+			}
+		],
+		"name": "gameOver",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -371,12 +352,31 @@ export const GAME_ABI = [
 				"type": "address[10]"
 			},
 			{
+				"internalType": "bytes32[10]",
+				"name": "",
+				"type": "bytes32[10]"
+			},
+			{
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "initLotteryList",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "initWeaponAndSkinData",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -393,27 +393,10 @@ export const GAME_ABI = [
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "LotteryItemList",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "itemType",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "num",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
+		"inputs": [],
+		"name": "mintGold",
+		"outputs": [],
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -602,6 +585,33 @@ export const GAME_ABI = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "reLive",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "requestLottery",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "setOwner",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -645,6 +655,20 @@ export const GAME_ABI = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "startGame",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "testWeaponSkin",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -658,6 +682,25 @@ export const GAME_ABI = [
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "topPlayerChainHashList",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
 			}
 		],
 		"stateMutability": "view",
@@ -717,25 +760,6 @@ export const GAME_ABI = [
 	{
 		"inputs": [],
 		"name": "totalLotteryTimes",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "salt",
-				"type": "uint256"
-			}
-		],
-		"name": "VRF",
 		"outputs": [
 			{
 				"internalType": "uint256",
