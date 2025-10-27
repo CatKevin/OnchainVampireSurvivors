@@ -29,7 +29,7 @@ Tips: Please use chrome browser to open.
 ![Alt text](https://github.com/CatKevin/OnchainVampireSurvivors/blob/main/images/1.png?raw=true)
 
 ### 2、Home Scene
-- On the homepage, you can see various game data, such as the number of gold coins and diamonds, network icon, wallet address, etc., as well as game characters and weapons, and of course the scrolling background and LOGO I drew specifically for Somnia Testnet.
+- On the homepage, you can see various game data, such as the number of gold coins and diamonds, network icon, wallet address, etc., as well as game characters and weapons, and of course the scrolling background and LOGO I drew specifically for PUSH Testnet.
 - The five buttons on the right have different functions: Home, Weapons, Characters, Lottery, and Onchain Rankings.
 - Click the Start Game button, you need to pay 0.01 PUSH for the gas token, then wait for a moment and enter the game after the transaction is completed.
 - When you start the game, you need to pay 0.01 PUSH as the ticket fee to participate in the game, and this fee will be directly distributed to outstanding players in the current ranking as a game incentive. (If you can maintain a high ranking, it means you can earn a huge amount of PUSH tokens)
@@ -79,14 +79,14 @@ Tips: Please use chrome browser to open.
   
 ![Alt text](https://github.com/CatKevin/OnchainVampireSurvivors/blob/main/images/10.png?raw=true)
 
-- On the game settlement page, you need to click the Submit button to spread this valuable game data to Somnia Testnet, so that players around the world can see your outstanding performance!!
+- On the game settlement page, you need to click the Submit button to spread this valuable game data to PUSH Testnet, so that players around the world can see your outstanding performance!!
 
 ![Alt text](https://github.com/CatKevin/OnchainVampireSurvivors/blob/main/images/9.png?raw=true)
 
 
 
 ## How we built it
-I completed this project during this days. The time was very tight and the workload was huge because it involved game planning, art, gameplay mechanisms and algorithms, as well as smart contracts and interaction logic with the Somnia Testnet.
+I completed this project during this days. The time was very tight and the workload was huge because it involved game planning, art, gameplay mechanisms and algorithms, as well as smart contracts and interaction logic with the PUSH Testnet.
 
 ### 1、logo
 I use Photoshop to draw the game logo and most of the game assets
@@ -95,33 +95,36 @@ I use Photoshop to draw the game logo and most of the game assets
 ### 2、Gaming
 I used Photoshop to draw most of the game UI. I used cocos as the game engine, implemented various game mechanisms and algorithms, and completed the complete game logic. It took a lot of time to realize a complete game. I think most of the time was spent on designing game art and implementing game logic.
 
-### 3、ThirdWeb
-I use ThirdWeb technology to greatly reduce the entry threshold for web2 players. Players may not need to create their own wallets, they only need their own social accounts (such as Google, Apple, Facebook, etc.) or email and mobile phone numbers to enter the game. Of course, it also supports the use of most wallets such as metamask to enter the game.
+### 3、Push SDK
+I use Push SDK to greatly reduce the entry threshold for web2 players. Players may not need to create their own wallets, they only need their own social accounts (such as email etc.)  to enter the game. Of course, it also supports the use of most wallets such as metamask to enter the game.
 
 ### 4、Hardhat and smart contract
 I used hardhat to write the game's smart contract, which was designed to store various game data, including player assets, weapons, character skins, etc., to ensure the transparency and security of player data. 
 At the same time, a specific algorithm was designed to calculate and store the on-chain rankings to ensure the fairness of competition and incentives among game players. I use a unique algorithm to handle the player's lottery activities, so that the lottery process can happen on the chain! I designed a very smooth interactive page to make players feel involved!
-Then, combined with ThirdWeb technology, the smart contract was deployed to the Somnia Testnet.
+Then, combined with WebPush SDK, the smart contract was deployed to the PUSH Testnet.
 
+### 5、Important!!
+I used the Push SDK and the UEAFactory smart contract to implement a full-chain game leaderboard. This was previously unimaginable! Previously, player scores could only be ranked on a single chain!！！！
 
 ## Challenges we ran into
-Due to the limitations of the game engine, I couldn't use ThirdWeb SDK or Web3 SDK. I think about it for a long time, about a week, and write a react project to expose the API to the game engine. It allows me to successfully complete various functions supported by ThirdWeb in the game engine!
+Due to the limitations of the game engine, I couldn't use Push SDK or Web3 SDK. I think about it for a long time, about a week, and write a react project to expose the API to the game engine. It allows me to successfully complete various functions supported by Push SDK in the game engine!
 
 ## Accomplishments that we're proud of
 - I completed most of the game logic within the time limit.
 - I implemented specific algorithms to keep gamers immersed in the game, or at least give them a constant sense of tension and excitement.
-- Successfully deployed the smart contract to the Somnia Testnet. The Somnia Testnet is very fast and the experience is great!
+- Successfully deployed the smart contract to the PUSH Testnet. The PUSH Testnet is very fast and the experience is great!
+- I used the Push SDK and the UEAFactory smart contract to implement a full-chain game leaderboard. It's incredible that I've actually achieved this!！！
 
 ## What we learned
 - How to use game engines to realize your ideas
 - How to write smart contracts using a hardhat
-- How to deploy smart contracts to the Somnia Testnet
+- How to deploy smart contracts to the PUSH Testnet
 
 ## What's next for OnchainVampireSurvivors
 - Design more interesting game UI.
 - Improve the reward mechanism so that more top-ranked players can be reasonably allocated more rewards according to the algorithm, thereby increasing player enthusiasm.
 - Currently weapons and character skins are pre-designed. I would like to introduce generative AI technology so that players can draw or generate assets such as weapons and character skins by themselves, which will greatly increase the randomness and fun of the game.
-- Deploy it on Somnia Mainnet.
+- Deploy it on PUSH Mainnet.
 
 
 
