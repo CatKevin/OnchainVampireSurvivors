@@ -1,45 +1,24 @@
-import {
-  ConnectButton,
-  useActiveWallet,
-  useActiveWalletChain,
-  useConnectedWallets,
-} from "thirdweb/react";
-// import { client, GameContract, somniaTestnet } from "./client";
-import {
-  prepareContractCall,
-  readContract,
-  sendTransaction,
-  waitForReceipt,
-} from "thirdweb";
 import { useEffect } from "react";
-import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 import {
   PushUI,
   PushUniversalAccountButton,
-  PushUniversalWalletProvider,
+  usePushChain,
   usePushChainClient,
   usePushWalletContext,
 } from "@pushchain/ui-kit";
+import { ethers } from "ethers";
+import { GAME_ABI, GAME_CONTRACT_ADDRESS, JSON_RPC_PROVIDER } from "./config";
 
-// const wallets = [
-//   inAppWallet(),
-//   createWallet("io.metamask"),
-//   createWallet("com.coinbase.wallet"),
-// ];
 
 export function App() {
-  // window.thirdwebClient = client;
-
-  // const wallet = useActiveWallet();
-  // const chainId = useActiveWalletChain();
-
   const { connectionStatus } = usePushWalletContext();
   const { pushChainClient } = usePushChainClient();
+  const { PushChain } = usePushChain();
 
   useEffect(() => {
     if (connectionStatus == PushUI.CONSTANTS.CONNECTION.STATUS.CONNECTED) {
       window.isNetworkConnected = true;
-      window.userAccount = pushChainClient?.universal.account
+      window.userAccount = pushChainClient?.universal.account;
     } else {
       window.isNetworkConnected = false;
       window.userAccount = undefined;
@@ -67,349 +46,342 @@ export function App() {
   window.onConnectButtonClick = onConnectButtonClick;
   window.onConnectedButtonClick = onConnectedButtonClick;
 
+  const getGameContract = async () => {
+    const provider = new ethers.JsonRpcProvider(JSON_RPC_PROVIDER);
+    const contract = new ethers.Contract(
+      GAME_CONTRACT_ADDRESS,
+      GAME_ABI,
+      provider
+    );
+    return contract;
+  };
+
   /// ###########################################
   /// read contract function
   /// ###########################################
 
-  // const getTopListInfo = async (onSuccess?: (receipt: any) => void) => {
-  //   const data = await readContract({
-  //     contract: GameContract,
-  //     method: "getTopListInfo",
-  //     params: [],
-  //   });
-  //   onSuccess?.(data);
-  // };
+  const getTopListInfo = async (onSuccess?: (receipt: any) => void) => {
+    try {
+      let contract = await getGameContract();
+      const data = await contract.getTopListInfo();
+      onSuccess?.(data);
+    } catch (err) {
+      console.error("Error getTopListInfo:", err);
+    }
+  };
 
-  // const getPlayerAllAssets = async (onSuccess?: (receipt: any) => void) => {
-  //   let account = wallet?.getAccount()?.address;
-  //   if (account) {
-  //     const data = await readContract({
-  //       contract: GameContract,
-  //       method: "getPlayerAllAssets",
-  //       params: [account],
-  //     });
-  //     onSuccess?.(data);
-  //   }
-  // };
+  const getPlayerAllAssets = async (onSuccess?: (receipt: any) => void) => {
+    try {
+      let contract = await getGameContract();
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const data = await contract.getPlayerAllAssets(account);
+        onSuccess?.(data);
+      }
+    } catch (err) {
+      console.error("Error getPlayerAllAssets:", err);
+    }
+  };
 
-  // const getPlayerLastLotteryResult = async (
-  //   onSuccess?: (receipt: any) => void
-  // ) => {
-  //   let account = wallet?.getAccount()?.address;
-  //   if (account) {
-  //     const data = await readContract({
-  //       contract: GameContract,
-  //       method: "getPlayerLastLotteryResult",
-  //       params: [account],
-  //     });
-  //     onSuccess?.(data);
-  //   }
-  // };
+  const getPlayerLastLotteryResult = async (
+    onSuccess?: (receipt: any) => void
+  ) => {
+    try {
+      let contract = await getGameContract();
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const data = await contract.getPlayerLastLotteryResult(account);
+        onSuccess?.(data);
+      }
+    } catch (err) {
+      console.error("Error getPlayerLastLotteryResult:", err);
+    }
+  };
 
-  // const getPlayerAllWeaponInfo = async (onSuccess?: (receipt: any) => void) => {
-  //   let account = wallet?.getAccount()?.address;
-  //   if (account) {
-  //     const data = await readContract({
-  //       contract: GameContract,
-  //       method: "getPlayerAllWeaponInfo",
-  //       params: [account],
-  //     });
-  //     onSuccess?.(data);
-  //   }
-  // };
+  const getPlayerAllWeaponInfo = async (onSuccess?: (receipt: any) => void) => {
+    try {
+      let contract = await getGameContract();
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const data = await contract.getPlayerAllWeaponInfo(account);
+        onSuccess?.(data);
+      }
+    } catch (err) {
+      console.error("Error getPlayerAllWeaponInfo:", err);
+    }
+  };
 
-  // const getPlayerAllSkinInfo = async (onSuccess?: (receipt: any) => void) => {
-  //   let account = wallet?.getAccount()?.address;
-  //   if (account) {
-  //     const data = await readContract({
-  //       contract: GameContract,
-  //       method: "getPlayerAllSkinInfo",
-  //       params: [account],
-  //     });
-  //     onSuccess?.(data);
-  //   }
-  // };
+  const getPlayerAllSkinInfo = async (onSuccess?: (receipt: any) => void) => {
+    try {
+      let contract = await getGameContract();
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const data = await contract.getPlayerAllSkinInfo(account);
+        onSuccess?.(data);
+      }
+    } catch (err) {
+      console.error("Error getPlayerAllSkinInfo:", err);
+    }
+  };
 
-  // window.getTopListInfo = getTopListInfo;
-  // window.getPlayerAllAssets = getPlayerAllAssets;
-  // window.getPlayerLastLotteryResult = getPlayerLastLotteryResult;
-  // window.getPlayerAllWeaponInfo = getPlayerAllWeaponInfo;
-  // window.getPlayerAllSkinInfo = getPlayerAllSkinInfo;
+  window.getTopListInfo = getTopListInfo;
+  window.getPlayerAllAssets = getPlayerAllAssets;
+  window.getPlayerLastLotteryResult = getPlayerLastLotteryResult;
+  window.getPlayerAllWeaponInfo = getPlayerAllWeaponInfo;
+  window.getPlayerAllSkinInfo = getPlayerAllSkinInfo;
 
   /// ###########################################
   /// write contract function
   /// ###########################################
 
-  // const startGame = async (
-  //   onSuccess?: (receipt: any) => void,
-  //   onError?: (receipt: any) => void
-  // ) => {
-  //   try {
-  //     let account = wallet?.getAccount();
-  //     if (account) {
-  //       const transaction = prepareContractCall({
-  //         contract: GameContract,
-  //         method: "startGame",
-  //         params: [],
-  //         value: BigInt(10 ** 16), // gas token amount for payable function
-  //       });
-  //       const transactionResult = await sendTransaction({
-  //         transaction: transaction,
-  //         account: account,
-  //       });
-  //       const receipt: TransactionReceipt = await waitForReceipt(
-  //         transactionResult
-  //       );
-  //       switch (receipt.status) {
-  //         case "success":
-  //           onSuccess?.(receipt);
-  //           break;
-  //         case "reverted":
-  //           onError?.(receipt);
-  //           break;
-  //       }
-  //     }
-  //   } catch (e: any) {
-  //     let message = e["message"];
-  //     if (message != null && message != undefined && message !== "") {
-  //       alert(message);
-  //     }
-  //   }
-  // };
+  const startGame = async (
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const tx = await pushChainClient?.universal.sendTransaction({
+          to: GAME_CONTRACT_ADDRESS,
+          data: PushChain.utils.helpers.encodeTxData({
+            abi: GAME_ABI,
+            functionName: "startGame",
+          }),
+          value: BigInt(10 ** 16), // gas token amount for payable function
+        });
+        const resp = await tx?.wait();
+        switch (resp?.status) {
+          case 1:
+            onSuccess?.(resp);
+            break;
+          case 0:
+            onError?.(resp);
+            break;
+        }
+      }
+    } catch (e: any) {
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
 
-  // const gameOver = async (
-  //   time: bigint,
-  //   kills: bigint,
-  //   onSuccess?: (receipt: any) => void,
-  //   onError?: (receipt: any) => void
-  // ) => {
-  //   try {
-  //     let account = wallet?.getAccount();
-  //     if (account) {
-  //       const transaction = prepareContractCall({
-  //         contract: GameContract,
-  //         method: "gameOver",
-  //         params: [time, kills],
-  //       });
-  //       const transactionResult = await sendTransaction({
-  //         transaction: transaction,
-  //         account: account,
-  //       });
-  //       const receipt: TransactionReceipt = await waitForReceipt(
-  //         transactionResult
-  //       );
-  //       switch (receipt.status) {
-  //         case "success":
-  //           onSuccess?.(receipt);
-  //           break;
-  //         case "reverted":
-  //           onError?.(receipt);
-  //           break;
-  //       }
-  //     }
-  //   } catch (e: any) {
-  //     let message = e["message"];
-  //     if (message != null && message != undefined && message !== "") {
-  //       alert(message);
-  //     }
-  //   }
-  // };
+  const gameOver = async (
+    time: bigint,
+    kills: bigint,
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const tx = await pushChainClient?.universal.sendTransaction({
+          to: GAME_CONTRACT_ADDRESS,
+          data: PushChain.utils.helpers.encodeTxData({
+            abi: GAME_ABI,
+            functionName: "gameOver",
+            args: [time, kills],
+          }),
+          value: BigInt(0),
+        });
+        const resp = await tx?.wait();
+        switch (resp?.status) {
+          case 1:
+            onSuccess?.(resp);
+            break;
+          case 0:
+            onError?.(resp);
+            break;
+        }
+      }
+    } catch (e: any) {
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
 
-  // const buyOrUpgradeSkin = async (
-  //   id: bigint,
-  //   onSuccess?: (receipt: any) => void,
-  //   onError?: (receipt: any) => void
-  // ) => {
-  //   try {
-  //     let account = wallet?.getAccount();
-  //     if (account) {
-  //       const transaction = prepareContractCall({
-  //         contract: GameContract,
-  //         method: "buyOrUpgradeSkin",
-  //         params: [id],
-  //       });
-  //       const transactionResult = await sendTransaction({
-  //         transaction: transaction,
-  //         account: account,
-  //       });
-  //       const receipt: TransactionReceipt = await waitForReceipt(
-  //         transactionResult
-  //       );
-  //       switch (receipt.status) {
-  //         case "success":
-  //           onSuccess?.(receipt);
-  //           break;
-  //         case "reverted":
-  //           onError?.(receipt);
-  //           break;
-  //       }
-  //     }
-  //   } catch (e: any) {
-  //     let message = e["message"];
-  //     if (message != null && message != undefined && message !== "") {
-  //       alert(message);
-  //     }
-  //   }
-  // };
+  const buyOrUpgradeSkin = async (
+    id: bigint,
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const tx = await pushChainClient?.universal.sendTransaction({
+          to: GAME_CONTRACT_ADDRESS,
+          data: PushChain.utils.helpers.encodeTxData({
+            abi: GAME_ABI,
+            functionName: "buyOrUpgradeSkin",
+            args: [id],
+          }),
+          value: BigInt(0),
+        });
+        const resp = await tx?.wait();
+        switch (resp?.status) {
+          case 1:
+            onSuccess?.(resp);
+            break;
+          case 0:
+            onError?.(resp);
+            break;
+        }
+      }
+    } catch (e: any) {
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
 
-  // const buyOrUpgradeWeapon = async (
-  //   id: bigint,
-  //   onSuccess?: (receipt: any) => void,
-  //   onError?: (receipt: any) => void
-  // ) => {
-  //   try {
-  //     let account = wallet?.getAccount();
-  //     if (account) {
-  //       const transaction = prepareContractCall({
-  //         contract: GameContract,
-  //         method: "buyOrUpgradeWeapon",
-  //         params: [id],
-  //       });
-  //       const transactionResult = await sendTransaction({
-  //         transaction: transaction,
-  //         account: account,
-  //       });
-  //       const receipt: TransactionReceipt = await waitForReceipt(
-  //         transactionResult
-  //       );
-  //       switch (receipt.status) {
-  //         case "success":
-  //           onSuccess?.(receipt);
-  //           break;
-  //         case "reverted":
-  //           onError?.(receipt);
-  //           break;
-  //       }
-  //     }
-  //   } catch (e: any) {
-  //     let message = e["message"];
-  //     if (message != null && message != undefined && message !== "") {
-  //       alert(message);
-  //     }
-  //   }
-  // };
+  const buyOrUpgradeWeapon = async (
+    id: bigint,
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const tx = await pushChainClient?.universal.sendTransaction({
+          to: GAME_CONTRACT_ADDRESS,
+          data: PushChain.utils.helpers.encodeTxData({
+            abi: GAME_ABI,
+            functionName: "buyOrUpgradeWeapon",
+            args: [id],
+          }),
+          value: BigInt(0),
+        });
+        const resp = await tx?.wait();
+        switch (resp?.status) {
+          case 1:
+            onSuccess?.(resp);
+            break;
+          case 0:
+            onError?.(resp);
+            break;
+        }
+      }
+    } catch (e: any) {
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
 
-  // const requestLottery = async (
-  //   onSuccess?: (receipt: any) => void,
-  //   onError?: (receipt: any) => void
-  // ) => {
-  //   try {
-  //     let account = wallet?.getAccount();
-  //     if (account) {
-  //       const transaction = await prepareContractCall({
-  //         contract: GameContract,
-  //         method: "requestLottery",
-  //         params: [],
-  //         value: BigInt(4 * 10 ** 16), // gas token amount for payable function
-  //       });
-  //       const transactionResult = await sendTransaction({
-  //         transaction: transaction,
-  //         account: account,
-  //       });
-  //       const receipt: TransactionReceipt = await waitForReceipt(
-  //         transactionResult
-  //       );
-  //       switch (receipt.status) {
-  //         case "success":
-  //           onSuccess?.(receipt);
-  //           break;
-  //         case "reverted":
-  //           onError?.(receipt);
-  //           break;
-  //       }
-  //     }
-  //   } catch (e: any) {
-  //     let message = e["message"];
-  //     if (message != null && message != undefined && message !== "") {
-  //       alert(message);
-  //     }
-  //   }
-  // };
+  const requestLottery = async (
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const tx = await pushChainClient?.universal.sendTransaction({
+          to: GAME_CONTRACT_ADDRESS,
+          data: PushChain.utils.helpers.encodeTxData({
+            abi: GAME_ABI,
+            functionName: "requestLottery",
+            args: [],
+          }),
+          value: BigInt(4 * 10 ** 16), // gas token amount for payable function
+        });
+        const resp = await tx?.wait();
+        switch (resp?.status) {
+          case 1:
+            onSuccess?.(resp);
+            break;
+          case 0:
+            onError?.(resp);
+            break;
+        }
+      }
+    } catch (e: any) {
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
 
-  // const mintGold = async (
-  //   onSuccess?: (receipt: any) => void,
-  //   onError?: (receipt: any) => void
-  // ) => {
-  //   try {
-  //     let account = wallet?.getAccount();
-  //     if (account) {
-  //       const transaction = await prepareContractCall({
-  //         contract: GameContract,
-  //         method: "mintGold",
-  //         params: [],
-  //         value: BigInt(10 ** 16), // gas token amount for payable function
-  //       });
-  //       const transactionResult = await sendTransaction({
-  //         transaction: transaction,
-  //         account: account,
-  //       });
-  //       const receipt: TransactionReceipt = await waitForReceipt(
-  //         transactionResult
-  //       );
-  //       switch (receipt.status) {
-  //         case "success":
-  //           onSuccess?.(receipt);
-  //           break;
-  //         case "reverted":
-  //           onError?.(receipt);
-  //           break;
-  //       }
-  //     }
-  //   } catch (e: any) {
-  //     let message = e["message"];
-  //     if (message != null && message != undefined && message !== "") {
-  //       alert(message);
-  //     }
-  //   }
-  // };
+  const mintGold = async (
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const tx = await pushChainClient?.universal.sendTransaction({
+          to: GAME_CONTRACT_ADDRESS,
+          data: PushChain.utils.helpers.encodeTxData({
+            abi: GAME_ABI,
+            functionName: "mintGold",
+            args: [],
+          }),
+          value: BigInt(10 ** 16), // gas token amount for payable function
+        });
+        const resp = await tx?.wait();
+        switch (resp?.status) {
+          case 1:
+            onSuccess?.(resp);
+            break;
+          case 0:
+            onError?.(resp);
+            break;
+        }
+      }
+    } catch (e: any) {
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
 
-  // const reLive = async (
-  //   onSuccess?: (receipt: any) => void,
-  //   onError?: (receipt: any) => void
-  // ) => {
-  //   try {
-  //     let account = wallet?.getAccount();
-  //     if (account) {
-  //       const transaction = await prepareContractCall({
-  //         contract: GameContract,
-  //         method: "reLive",
-  //         params: [],
-  //         value: BigInt(5 * 10 ** 16), // gas token amount for payable function
-  //       });
-  //       const transactionResult = await sendTransaction({
-  //         transaction: transaction,
-  //         account: account,
-  //       });
-  //       const receipt: TransactionReceipt = await waitForReceipt(
-  //         transactionResult
-  //       );
-  //       switch (receipt.status) {
-  //         case "success":
-  //           onSuccess?.(receipt);
-  //           break;
-  //         case "reverted":
-  //           onError?.(receipt);
-  //           break;
-  //       }
-  //     }
-  //   } catch (e: any) {
-  //     let message = e["message"];
-  //     if (message != null && message != undefined && message !== "") {
-  //       alert(message);
-  //     }
-  //   }
-  // };
+  const reLive = async (
+    onSuccess?: (receipt: any) => void,
+    onError?: (receipt: any) => void
+  ) => {
+    try {
+      let account = pushChainClient?.universal.account;
+      if (account) {
+        const tx = await pushChainClient?.universal.sendTransaction({
+          to: GAME_CONTRACT_ADDRESS,
+          data: PushChain.utils.helpers.encodeTxData({
+            abi: GAME_ABI,
+            functionName: "reLive",
+            args: [],
+          }),
+          value: BigInt(5 * 10 ** 16), // gas token amount for payable function
+        });
+        const resp = await tx?.wait();
+        switch (resp?.status) {
+          case 1:
+            onSuccess?.(resp);
+            break;
+          case 0:
+            onError?.(resp);
+            break;
+        }
+      }
+    } catch (e: any) {
+      let message = e["message"];
+      if (message != null && message != undefined && message !== "") {
+        alert(message);
+      }
+    }
+  };
 
-  // window.startGame = startGame;
-  // window.gameOver = gameOver;
-  // window.buyOrUpgradeSkin = buyOrUpgradeSkin;
-  // window.buyOrUpgradeWeapon = buyOrUpgradeWeapon;
-  // window.requestLottery = requestLottery;
-  // window.mintGold = mintGold;
-  // window.reLive = reLive;
-
-  // // contract
-  // window.storageContract = GameContract;
+  window.startGame = startGame;
+  window.gameOver = gameOver;
+  window.buyOrUpgradeSkin = buyOrUpgradeSkin;
+  window.buyOrUpgradeWeapon = buyOrUpgradeWeapon;
+  window.requestLottery = requestLottery;
+  window.mintGold = mintGold;
+  window.reLive = reLive;
 
   return (
     <main>
@@ -421,7 +393,6 @@ export function App() {
             {pushChainClient?.universal.account}
           </p>
         )}
-        {/* <ConnectButton client={client} wallets={wallets} chain={somniaTestnet} /> */}
       </div>
     </main>
   );

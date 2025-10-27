@@ -1,12 +1,10 @@
 interface Window {
   ethereum?: any;
   web3?: any;
-  thirdwebClient: thirdwebClient;
   isNetworkConnected: boolean;
   userAccount?: String;
   onConnectButtonClick: Function;
   onConnectedButtonClick: Function;
-  storageContract: Readonly<ContractOptions<[]>>;
   // read function
   getTopListInfo: (onSuccess?: (receipt: any) => void) => Promise<void>;
   getPlayerAllAssets: (onSuccess?: (receipt: any) => void) => Promise<void>;
