@@ -56,6 +56,12 @@ export function App() {
     return contract;
   };
 
+  const parseChainHash = (chainHash: any) => {
+    return PushChain.utils.helpers.getChainName(ethers.toUtf8String(chainHash));
+  }
+
+  window.parseChainHash = parseChainHash;
+
   /// ###########################################
   /// read contract function
   /// ###########################################

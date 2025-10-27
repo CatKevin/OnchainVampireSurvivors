@@ -34,13 +34,13 @@ export default class UIRankingsPanel extends UIPage {
 
     let r = "";
     if (h > 0) {
-        r += h + ":";
+      r += h + ":";
     }
     r += m < 10 ? "0" + m : m;
     r += ":";
     r += s < 10 ? "0" + s : s;
     return r;
-}
+  }
 
   formatTime(timestamp: string) {
     let date = new Date(parseInt(timestamp) * 1000);
@@ -60,16 +60,37 @@ export default class UIRankingsPanel extends UIPage {
 
         let rankingsList = [];
         let topGradeList = result[0];
-        let topTimeList= result[1];
+        let topTimeList = result[1];
         let topPlayerList = result[2];
-        let lastUpdateTime = result[3];
+        let topPlayerChainHashList: any[] = result[3];
+        let lastUpdateTime = result[4];
         for (let i = 0; i < 10; i++) {
           let grade = parseInt(topGradeList[i]);
           if (grade > 0) {
+            let chainHash = topPlayerChainHashList[i];
+            let chainName = "unknown"
+            if (
+              chainHash ===
+              "0x5055534800000000000000000000000000000000000000000000000000000000"
+            ) {
+              chainName = "PUSH";
+            } else if (
+              chainHash ===
+              "0xf6839e8ce78fb8ed241eafab49d6b96103bbb6c0087d28eb668a9342ff6078a3"
+            ) {
+              chainName = "Ethereum";
+            } else if (
+              chainHash ===
+              "0xbf4fcc51643a2a75fa848f3480f506e82661c06551ddc80a6d6180d49aff20b9"
+            ) {
+              chainName = "Solana";
+            }
+
             rankingsList.push({
               time: parseInt(topTimeList[i]),
               address: topPlayerList[i],
               grade: grade,
+              chainName: chainName,
             });
           }
         }
@@ -84,7 +105,7 @@ export default class UIRankingsPanel extends UIPage {
 
         rankingsList.sort((a, b) => b.grade - a.grade);
 
-        console.log('rankingsList:', rankingsList)
+        console.log("rankingsList:", rankingsList);
 
         let list = cc.find("panel/list", this._page);
         let content = cc.find("view/content", list);
@@ -92,10 +113,51 @@ export default class UIRankingsPanel extends UIPage {
           let pre = cocosz.resMgr.getRes("RankingListItem", cc.Prefab);
           const instance: cc.Node = cc.instantiate(pre);
 
-          console.log('rankingsList[i].time: ', rankingsList[i].time)
-          console.log('this.parseGameTime(rankingsList[i].time): ', this.parseGameTime(rankingsList[i].time))
+          console.log("rankingsList[i].chainName: ", rankingsList[i].chainName);
+          console.log("rankingsList[i].time: ", rankingsList[i].time);
+          console.log(
+            "this.parseGameTime(rankingsList[i].time): ",
+            this.parseGameTime(rankingsList[i].time)
+          );
 
           let address = rankingsList[i].address;
+          let chainName = rankingsList[i].chainName;
+
+          switch(chainName) {
+            case "Ethereum":
+              instance.getChildByName("icon").getComponent(
+                cc.Sprite
+              ).spriteFrame = cocosz.resMgr.getRes(
+                "ethereum_logo",
+                cc.SpriteFrame
+              );
+              break;
+            case "PUSH":
+              instance.getChildByName("icon").getComponent(
+                cc.Sprite
+              ).spriteFrame = cocosz.resMgr.getRes(
+                "push_logo",
+                cc.SpriteFrame
+              );
+              break;
+            case "Solana":
+              instance.getChildByName("icon").getComponent(
+                cc.Sprite
+              ).spriteFrame = cocosz.resMgr.getRes(
+                "solana_logo",
+                cc.SpriteFrame
+              );
+              break;
+            default:
+              instance.getChildByName("icon").getComponent(
+                cc.Sprite
+              ).spriteFrame = cocosz.resMgr.getRes(
+                "unknown_logo",
+                cc.SpriteFrame
+              );
+              break;
+          }
+          
           instance.getChildByName("rank").getComponent(cc.Label).string =
             "NO." + (i + 1);
           instance.getChildByName("address").getComponent(cc.Label).string =
@@ -103,7 +165,7 @@ export default class UIRankingsPanel extends UIPage {
           instance.getChildByName("time").getComponent(cc.Label).string =
             this.parseGameTime(rankingsList[i].time);
           instance.getChildByName("grade").getComponent(cc.Label).string =
-          rankingsList[i].grade;
+            rankingsList[i].grade;
 
           instance.parent = content;
         }

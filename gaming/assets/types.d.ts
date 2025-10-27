@@ -5,6 +5,7 @@ interface Window {
   userAccount?: String;
   onConnectButtonClick: Function;
   onConnectedButtonClick: Function;
+  parseChainHash: (chainHash: any) => string | undefined;
   // read function
   getTopListInfo: (onSuccess?: (receipt: any) => void) => Promise<void>;
   getPlayerAllAssets: (onSuccess?: (receipt: any) => void) => Promise<void>;
