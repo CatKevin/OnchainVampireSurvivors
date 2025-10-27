@@ -2,7 +2,7 @@ interface Window {
   ethereum?: any;
   web3?: any;
   thirdwebClient: thirdwebClient;
-  isBaseSepoliaNetwork: boolean;
+  isNetworkConnected: boolean;
   userAccount?: String;
   onConnectButtonClick: Function;
   onConnectedButtonClick: Function;
