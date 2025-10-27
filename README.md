@@ -31,8 +31,8 @@ Tips: Please use chrome browser to open.
 ### 2、Home Scene
 - On the homepage, you can see various game data, such as the number of gold coins and diamonds, network icon, wallet address, etc., as well as game characters and weapons, and of course the scrolling background and LOGO I drew specifically for Somnia Testnet.
 - The five buttons on the right have different functions: Home, Weapons, Characters, Lottery, and Onchain Rankings.
-- Click the Start Game button, you need to pay 0.01 STT for the gas token, then wait for a moment and enter the game after the transaction is completed.
-- When you start the game, you need to pay 0.01 STT as the ticket fee to participate in the game, and this fee will be directly distributed to outstanding players in the current ranking as a game incentive. (If you can maintain a high ranking, it means you can earn a huge amount of STT tokens)
+- Click the Start Game button, you need to pay 0.01 PUSH for the gas token, then wait for a moment and enter the game after the transaction is completed.
+- When you start the game, you need to pay 0.01 PUSH as the ticket fee to participate in the game, and this fee will be directly distributed to outstanding players in the current ranking as a game incentive. (If you can maintain a high ranking, it means you can earn a huge amount of PUSH tokens)
 
 ![Alt text](https://github.com/CatKevin/OnchainVampireSurvivors/blob/main/images/2.png?raw=true)
 
@@ -52,7 +52,7 @@ Tips: Please use chrome browser to open.
 
 #### 2.3 Lottery Page
 
-- Players need to pay 0.04 STT to participate in the lottery, and can draw gold coins, diamonds and advanced weapons.
+- Players need to pay 0.04 PUSH to participate in the lottery, and can draw gold coins, diamonds and advanced weapons.
 - A VRF random extraction function is implemented to ensure the fairness and randomness of the lottery.
 - If you want to experience the Howitzer and Gatling as soon as possible, please come and participate in our lucky draw!
 
