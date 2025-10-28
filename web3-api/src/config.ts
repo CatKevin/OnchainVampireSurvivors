@@ -2,7 +2,7 @@ import { PushUI } from "@pushchain/ui-kit";
 
 export const CHAIN_NETWORK = PushUI.CONSTANTS.PUSH_NETWORK.TESTNET;
 
-export const GAME_CONTRACT_ADDRESS = "0xd7dC09839B00B15916A747070b888cC812C12Aca";
+export const GAME_CONTRACT_ADDRESS = "0x0511987d4fbB61c0cBD71ae463bF4ba98e547FA5";
 
 export const JSON_RPC_PROVIDER = "https://evm.rpc-testnet-donut-node1.push.org/";
 
