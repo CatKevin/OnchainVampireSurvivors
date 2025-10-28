@@ -84,6 +84,16 @@ export default class UIRankingsPanel extends UIPage {
               "0xbf4fcc51643a2a75fa848f3480f506e82661c06551ddc80a6d6180d49aff20b9"
             ) {
               chainName = "Solana";
+            } else if (
+              chainHash ===
+              "0x1b39756aef587380aa62b477d0e0a7cd438c5098f3cab5f040b3f908d891a37d"
+            ) {
+              chainName = "Base";
+            } else if (
+              chainHash ===
+              "0x988cfce8d0ac6a40d4ed7edbe0829990cc7970babae80067a0016fc42538c6c0"
+            ) {
+              chainName = "Arbitrum";
             }
 
             rankingsList.push({
@@ -145,6 +155,22 @@ export default class UIRankingsPanel extends UIPage {
                 cc.Sprite
               ).spriteFrame = cocosz.resMgr.getRes(
                 "solana_logo",
+                cc.SpriteFrame
+              );
+              break;
+            case "Base":
+                instance.getChildByName("icon").getComponent(
+                  cc.Sprite
+                ).spriteFrame = cocosz.resMgr.getRes(
+                  "base_logo",
+                  cc.SpriteFrame
+                );
+                break;
+            case "Arbitrum":
+              instance.getChildByName("icon").getComponent(
+                cc.Sprite
+              ).spriteFrame = cocosz.resMgr.getRes(
+                "arbitrum_logo",
                 cc.SpriteFrame
               );
               break;

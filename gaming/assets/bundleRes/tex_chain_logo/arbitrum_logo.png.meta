@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "d003c6a9-1162-435d-a425-f8198d397d66",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 400,
+  "height": 400,
+  "platformSettings": {},
+  "subMetas": {
+    "arbitrum_logo": {
+      "ver": "1.0.6",
+      "uuid": "2d50606d-fcac-487d-9465-a5f408ff2f98",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "d003c6a9-1162-435d-a425-f8198d397d66",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -3.5,
+      "offsetY": 2,
+      "trimX": 34,
+      "trimY": 15,
+      "width": 325,
+      "height": 366,
+      "rawWidth": 400,
+      "rawHeight": 400,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
